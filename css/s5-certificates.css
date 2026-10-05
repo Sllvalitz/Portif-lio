@@ -1,0 +1,468 @@
+/* =============================================================
+   s5-certificates.css — Certificados
+   Portfolio: Anderson da Silva
+   ============================================================= */
+
+#certs {
+  background: transparent; /* herda o preto do body */
+  min-height: 100vh;
+  scroll-snap-align: none;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  padding: calc(120 * var(--u)) 0 calc(60 * var(--u));
+}
+
+/* Largura vem de .container (global.css): 1280 * u, centralizado */
+
+/* ---- GALERIA HORIZONTAL ---- */
+.certs__row {
+  display: flex;
+  height: calc(380 * var(--u));
+}
+
+/* ---- CARD INDIVIDUAL ----
+   flex-grow controlado via JS (GSAP) no hover: o card sob o cursor
+   cresce sutilmente (~1.25) enquanto os demais permanecem em 1 —
+   a distribuição inteira é recalculada, não uma sobreposição. */
+.cert-card {
+  flex: 1 1 0;
+  position: relative;
+  cursor: pointer;
+  border-radius: calc(16 * var(--u));
+  margin: 0 calc(8 * var(--u));
+  overflow: hidden;
+  background: var(--white-a04);
+  border: 1px solid var(--white-a08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end; /* título + índice ancorados embaixo */
+  padding: calc(30 * var(--u)) calc(20 * var(--u)) calc(24 * var(--u));
+  transition: border-color 0.3s ease, flex-grow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* O card sob o cursor — ou o card ativo (clicado) — cresce sutilmente;
+   os demais se redistribuem */
+.cert-card:hover,
+.cert-card.active {
+  flex-grow: 1.25;
+}
+
+.cert-card:hover,
+.cert-card.active {
+  border-color: var(--white-a22);
+}
+
+.cert-card:focus-visible {
+  outline: 2px solid var(--text-heading);
+  outline-offset: 3px;
+}
+
+/* Background close-up (certificate as texture) */
+.cert-card__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  filter: blur(6px);
+  transform: scale(1.08); /* evita halo transparente nas bordas ao desfocar */
+  transition: opacity 0.5s ease, filter 0.5s ease;
+  z-index: 0;
+}
+
+.cert-card:hover .cert-card__bg,
+.cert-card.active .cert-card__bg {
+  opacity: 1;
+  filter: blur(0);
+}
+
+/* Dark overlay for legibility */
+.cert-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--black-a72);
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.cert-card:hover .cert-card__overlay,
+.cert-card.active .cert-card__overlay {
+  opacity: 1;
+}
+
+/* SCANLINE SWEEP */
+.cert-card__scan {
+  position: absolute;
+  top: 0; left: 0;
+  width: 60%;
+  transform: translateX(-100%); /* parado fora do card, à esquerda */
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--white-a06) 40%,
+    var(--white-a14) 50%,
+    var(--white-a06) 60%,
+    transparent 100%
+  );
+  z-index: 8;
+  pointer-events: none;
+}
+
+/* Varredura única ao entrar no card (antes feita via GSAP) */
+.cert-card:hover .cert-card__scan {
+  animation: cert-card-scan 0.65s cubic-bezier(0.5, 1, 0.89, 1);
+}
+
+@keyframes cert-card-scan {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(184%); }
+}
+
+/* ---- LOGO AREA ---- */
+/* Posição fixa: fora do fluxo, não depende da altura do título */
+.cert-card__logo-wrap {
+  position: absolute;
+  top: calc(72 * var(--u));
+  left: 0;
+  width: 100%;
+  height: calc(80 * var(--u));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cert-card__logo {
+  width: calc(80 * var(--u)); height: calc(80 * var(--u));
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.35;
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.cert-card:hover .cert-card__logo,
+.cert-card.active .cert-card__logo {
+  opacity: 0.75;
+  transform: scale(1.08);
+}
+
+.cert-card__logo-placeholder {
+  width: calc(70 * var(--u)); height: calc(70 * var(--u));
+  border: 1px solid var(--white-a20);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.12em;
+  color: var(--white-a30);
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+
+.cert-card:hover .cert-card__logo-placeholder { opacity: 1; }
+
+/* ---- STACKED TITLE ---- */
+.cert-card__title {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  color: var(--text-heading);
+  line-height: 1.9;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+.cert-card:hover .cert-card__title,
+.cert-card.active .cert-card__title {
+  color: var(--text-heading);
+}
+
+/* ---- INDEX ---- */
+.cert-card__index {
+  position: relative;
+  z-index: 5;
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  color: var(--text-muted);
+  margin-top: calc(14 * var(--u));
+  transition: color 0.3s;
+}
+
+.cert-card:hover .cert-card__index,
+.cert-card.active .cert-card__index {
+  color: var(--text-muted);
+}
+
+/* =============================================================
+   PAINEL DE DETALHES — inline, abaixo da galeria (não é modal)
+   ============================================================= */
+.cert-panel {
+  margin: calc(28 * var(--u)) auto 0;
+  width: 50%;
+  min-width: calc(460 * var(--u));
+  display: grid;
+  grid-template-columns: calc(340 * var(--u)) 1fr;
+  background: var(--surface-1);
+  border: 1px solid var(--white-a12);
+  border-radius: calc(16 * var(--u));
+  overflow: hidden;
+
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.cert-panel.is-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cert-panel__preview,
+.cert-panel__info {
+  transition: opacity 0.18s ease;
+}
+
+.cert-panel.is-changing .cert-panel__preview,
+.cert-panel.is-changing .cert-panel__info {
+  opacity: 0.25;
+}
+
+.cert-panel__preview {
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(320 * var(--u));
+  padding: calc(28 * var(--u));
+}
+
+.cert-panel__preview-img {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: calc(6 * var(--u));
+  display: block;
+}
+
+.cert-panel__preview-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--white-a04);
+  border: 1px dashed var(--white-a12);
+  border-radius: calc(6 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  color: var(--white-a20);
+  letter-spacing: 0.2em;
+}
+
+.cert-panel__info {
+  padding: calc(34 * var(--u)) calc(32 * var(--u));
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--white-a07);
+}
+
+.cert-panel__counter {
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  margin-bottom: calc(14 * var(--u));
+}
+
+.cert-panel__title {
+  font-family: var(--display);
+  font-size: max(20px, calc(25 * var(--u)));
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--text-heading);
+  line-height: 1.15;
+  margin-bottom: calc(24 * var(--u));
+  text-transform: uppercase;
+}
+
+.cert-panel__field {
+  margin-bottom: calc(18 * var(--u));
+}
+
+.cert-panel__label {
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.3em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: calc(4 * var(--u));
+}
+
+.cert-panel__value {
+  font-family: var(--body);
+  font-size: max(12.6px, calc(14 * var(--u)));
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+.cert-panel__cta {
+  margin-top: auto;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  background: transparent;
+  border: 1px solid var(--white-a25);
+  color: var(--text-soft);
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: calc(12 * var(--u)) calc(20 * var(--u));
+  cursor: pointer;
+  border-radius: calc(6 * var(--u));
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.cert-panel__cta:hover {
+  background: var(--white-a06);
+  border-color: var(--white-a50);
+}
+
+/* =============================================================
+   VISUALIZADOR DE PDF — overlay quase fullscreen, vidro fosco
+   ============================================================= */
+.pdf-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.pdf-viewer.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pdf-viewer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--black-a60);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(calc(16 * var(--u)));
+}
+
+.pdf-viewer__box {
+  position: relative;
+  width: 70vw;
+  height: 70vh;
+  background: var(--surface-1);
+  border: 1px solid var(--white-a12);
+  border-radius: calc(16 * var(--u));
+  box-shadow: 0 calc(24 * var(--u)) calc(64 * var(--u)) var(--black-a55);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.pdf-viewer.open .pdf-viewer__box {
+  transform: scale(1);
+}
+
+.pdf-viewer__img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.pdf-viewer__empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calc(40 * var(--u));
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  letter-spacing: 0.1em;
+  line-height: 1.8;
+  color: var(--white-a35);
+}
+
+.pdf-viewer__close {
+  position: absolute;
+  top: calc(16 * var(--u)); right: calc(16 * var(--u));
+  z-index: 10;
+  background: var(--black-a50);
+  border: 1px solid var(--white-a25);
+  color: var(--white);
+  width: calc(38 * var(--u)); height: calc(38 * var(--u));
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: max(14.4px, calc(16 * var(--u)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.pdf-viewer__close:hover {
+  background: var(--white-a10);
+  border-color: var(--white-a50);
+}
+
+/* Botão discreto "Baixar PDF" (solução híbrida) */
+.pdf-viewer__download {
+  position: absolute;
+  bottom: calc(16 * var(--u)); right: calc(16 * var(--u));
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  background: var(--black-a55);
+  border: 1px solid var(--white-a20);
+  color: var(--white-a80);
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: calc(10 * var(--u)) calc(16 * var(--u));
+  border-radius: calc(6 * var(--u));
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.pdf-viewer__download:hover {
+  background: var(--white-a08);
+  border-color: var(--white-a45);
+  color: var(--white);
+}
+
+.pdf-viewer__download[hidden] {
+  display: none;
+}
+

@@ -1,0 +1,288 @@
+/* =============================================================
+   responsive.css — Tablet e celular
+   Portfolio: Anderson da Silva
+
+   Carregado POR ÚLTIMO. Tudo vive dentro de @media (max-width):
+   acima de 1024px nada daqui é aplicado, então o desktop não muda.
+
+   Faixas:
+     ≤1024  compacto (tablet/celular): seções empilhadas, sem snap
+     ≤900   modais (mesmo breakpoint dos outros arquivos)
+     ≤600   celular
+     ≤480 / ≤360  ajustes finos
+   Só usa tokens do global.css (nenhuma cor literal).
+   ============================================================= */
+
+@media (max-width: 1024px) {
+
+  /* ---- BASE ---- */
+  html { scroll-snap-type: none; }
+
+  section {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  .container { width: calc(100% - 48px); }
+
+  /* ---- HEADER: barra fixa com fundo (o conteúdo rola por baixo) ---- */
+  .site-header {
+    height: 76px;
+    background: var(--black-a70);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--white-a08);
+  }
+
+  .site-header__logo { top: 15px; left: 24px; width: 44px; height: 44px; }
+  .navbar__links { gap: 2.2rem; }
+
+  /* O indicador vertical invade o conteúdo em telas estreitas */
+  .section-indicator { display: none; }
+
+  /* ---- HERO: nome empilhado, mão centralizada embaixo ---- */
+  #hero {
+    min-height: 620px;
+    min-height: max(100svh, 620px);
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .hero__name-block {
+    position: relative;
+    inset: auto;
+    margin: 0;
+    width: 100%;
+    height: auto;
+    padding: clamp(96px, 16vh, 150px) 24px 0;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .hero__prazer   { margin: 0; font-size: clamp(28px, 7vw, 64px); }
+  .hero__anderson { left: 0; width: auto; font-size: min(17vw, 128px); }
+  .hero__da-silva { margin: 4px 0 0; align-self: flex-end; font-size: min(17vw, 128px); }
+  .hero__subtitle {
+    left: 0;
+    margin-left: 0;
+    width: auto;
+    margin-top: 14px;
+    max-width: 100%;
+    align-self: flex-end;
+    text-align: right;
+    font-size: clamp(12px, 3vw, 17px);
+  }
+
+  #hero-image {
+    top: auto;
+    bottom: 64px;
+    left: 50%;
+    width: min(110vw, 78vh, 620px);
+    height: auto;
+    aspect-ratio: 800 / 880;
+    transform: translateX(-50%) rotate(17deg);
+  }
+
+  .hero__stack { bottom: 20px; right: 24px; }
+
+  /* ---- SOBRE ---- */
+  #about { padding: 104px 0 72px; }
+
+  .about__container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    width: calc(100% - 48px);
+  }
+
+  .about__left-col { flex-direction: column; gap: 32px; }
+
+  .about__photo {
+    order: -1;
+    flex: none;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 4 / 5;
+  }
+
+  /* Linha do tempo vertical, com o texto sempre visível (sem hover) */
+  .timeline-v {
+    width: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 20px;
+    padding: 0;
+  }
+
+  .timeline-v__arrow,
+  .timeline-v__hint { display: none; }
+
+  .timeline-v__line {
+    top: 6px;
+    bottom: 6px;
+    left: 4px;
+    right: auto;
+    width: 1px;
+    height: auto;
+  }
+
+  .timeline-v__point {
+    display: grid;
+    grid-template-columns: 9px 1fr;
+    grid-template-areas: "dot year" ". card";
+    justify-content: start;
+    align-items: center;
+    gap: 4px 14px;
+  }
+
+  .timeline-v__dot  { grid-area: dot; }
+  .timeline-v__year { grid-area: year; font-size: 12px; }
+
+  .timeline-v__card,
+  .timeline-v__point:hover .timeline-v__card,
+  .timeline-v__point:focus-visible .timeline-v__card {
+    grid-area: card;
+    position: static;
+    transform: none;
+    opacity: 1;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 12px;
+  }
+
+  .about__bio-text,
+  .about__bio-text.bio-stream { text-align: left; max-width: none; }
+
+  .about__edu-grid { grid-template-columns: 1fr; gap: 20px; }
+  .about__stack { margin-top: 32px; }
+
+  /* ---- PROJETOS ---- */
+  #projects { padding: 104px 0 72px; }
+
+  .projects__main { grid-template-columns: 1fr; gap: 28px; }
+  .project__title { font-size: clamp(26px, 5vw, 36px); }
+  .project__desc  { text-align: left; }
+  .project__carousel { margin-top: 24px; }
+
+  .carousel__thumbs { min-width: 0; }
+  .carousel__thumb  { flex: 0 1 90px; min-width: 0; }
+
+  /* ---- CERTIFICADOS: galeria vira faixa rolável com snap ---- */
+  #certs { padding: 104px 0 72px; align-items: flex-start; }
+
+  .certs__row {
+    height: 320px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .certs__row::-webkit-scrollbar { display: none; }
+
+  .cert-card {
+    flex: 0 0 min(64vw, 260px);
+    scroll-snap-align: start;
+  }
+
+  .cert-card:hover,
+  .cert-card.active { flex-grow: 0; }
+
+  .cert-panel {
+    width: 100%;
+    min-width: 0;
+    margin-top: 20px;
+    grid-template-columns: 1fr;
+  }
+
+  .cert-panel__preview { min-height: 0; padding: 16px; }
+
+  .cert-panel__info {
+    padding: 24px 20px;
+    border-left: 0;
+    border-top: 1px solid var(--white-a07);
+  }
+
+  .cert-panel__title { font-size: 22px; margin-bottom: 18px; }
+  .cert-panel__cta   { margin-top: 6px; }
+
+  /* ---- FOOTER ---- */
+  .site-footer { padding-top: 48px; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .site-footer__main { gap: 28px; }
+  .site-footer__title { font-size: clamp(38px, 10vw, 64px); }
+  .site-footer__email { overflow-wrap: anywhere; }
+}
+
+/* ---- MODAIS (breakpoint já usado em s4/s5) ---- */
+@media (max-width: 900px) {
+  .project-modal__box { min-height: 0; height: calc(100dvh - 24px); }
+  .pdf-viewer__box    { height: 80dvh; }
+
+  .project-overview__info { margin-top: 0; }
+
+  /* Tooltip das estrelas ancorado na linha inteira (cabe em qualquer largura) */
+  .project-overview__difficulty { position: relative; }
+  .difficulty-star { position: static; }
+
+  /* Sem transform no hover: transform viraria o "pai" do tooltip absoluto */
+  .difficulty-star:hover,
+  .difficulty-star:focus-visible { transform: none; }
+
+  .difficulty-star:nth-child(n) .difficulty-star__tooltip {
+    left: 0;
+    right: auto;
+    width: min(260px, 100%);
+    transform: translateY(6px);
+  }
+
+  .difficulty-star:nth-child(n):hover .difficulty-star__tooltip,
+  .difficulty-star:nth-child(n):focus-visible .difficulty-star__tooltip {
+    transform: translateY(0);
+  }
+}
+
+/* ---- CELULAR ---- */
+@media (max-width: 600px) {
+  .container,
+  .about__container { width: calc(100% - 40px); }
+
+  .site-header { height: 56px; }
+  .site-header__logo { top: 10px; left: 14px; width: 36px; height: 36px; }
+
+  .navbar { justify-content: flex-end; padding-right: 14px; }
+  .navbar__links { gap: 12px; }
+  .navbar__links li a { font-size: 9.5px; letter-spacing: 0.08em; }
+  .navbar__chev { display: none; } /* evita o menu "pular" quando o item ativo muda */
+
+  .hero__name-block { padding: clamp(80px, 14vh, 130px) 20px 0; }
+  .hero__stack { right: 20px; }
+
+  #about,
+  #projects,
+  #certs { padding-top: 84px; }
+
+  .certs__row { height: 300px; }
+
+  .project__carousel { gap: 8px; }
+
+  .site-footer__meta { flex-direction: column; align-items: flex-start; }
+
+  .coord-tl, .coord-tr { top: 20px; }
+  .coord-bl, .coord-br { bottom: 20px; }
+  .coord-tl, .coord-bl { left: 20px; }
+  .coord-tr, .coord-br { right: 20px; }
+}
+
+@media (max-width: 480px) {
+  .project-modal__tab { font-size: 10px; letter-spacing: 0.1em; padding: 9px 12px; }
+  .project-modal__panel { padding: 20px 16px; }
+}
+
+@media (max-width: 360px) {
+  .navbar__links { gap: 9px; }
+  .navbar__links li a { font-size: 9px; letter-spacing: 0.04em; }
+}

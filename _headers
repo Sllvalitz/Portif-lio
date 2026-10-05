@@ -1,0 +1,24 @@
+# Headers de segurança e cache — formato Netlify / Cloudflare Pages.
+# Em outros hosts (Vercel, Nginx, Apache, GitHub Pages) os mesmos valores
+# vão em vercel.json / nginx.conf / .htaccess — GitHub Pages não permite
+# headers customizados.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com 'sha256-jUZxtWpw4DV0IQhRX5H3ru1e1dp8mw4R5M/IbwaAJK8='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.simpleicons.org; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000
+
+# HTML sempre revalidado; CSS/JS 1h (os nomes não têm hash de versão,
+# então cache longo exigiria renomear a cada deploy); assets 30 dias.
+/
+  Cache-Control: no-cache
+/*.html
+  Cache-Control: no-cache
+/css/*
+  Cache-Control: public, max-age=3600, must-revalidate
+/js/*
+  Cache-Control: public, max-age=3600, must-revalidate
+/assets/*
+  Cache-Control: public, max-age=2592000

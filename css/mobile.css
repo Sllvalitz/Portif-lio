@@ -1,0 +1,690 @@
+/* =============================================================
+   mobile.css — Celular e tablet em retrato (≤ 900px)
+   Portfolio: Anderson da Silva
+
+   Carregado POR ÚLTIMO e todo dentro de @media: acima de 900px
+   NADA daqui é aplicado, então o desktop não muda.
+
+   Estratégia: o desktop usa calc(N * var(--u)). Aqui --u volta a
+   valer 1px (os tamanhos "em u" viram px reais) e só o que muda de
+   DISPOSIÇÃO é reescrito. Só usa tokens do global.css (sem cor literal).
+   ============================================================= */
+
+@media (max-width: 900px) {
+
+  :root {
+    --u: 1px;
+    /* Área segura (notch, Dynamic Island, cantos arredondados, barra home):
+       env() vale 0 onde não há recorte. Exige viewport-fit=cover no <meta>. */
+    --m-gutter: max(20px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+    --m-header: calc(76px + env(safe-area-inset-top, 0px)); /* 10px de margem + 56px da barra + folga */
+  }
+
+  /* ---- BASE ---- */
+  html { scroll-snap-type: none; }
+
+  section {
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  .container {
+    width: calc(100% - 2 * var(--m-gutter));
+    max-width: none;
+  }
+
+  /* O indicador vertical invade o conteúdo em telas estreitas */
+  .section-indicator { display: none; }
+
+  /* =============================================================
+     HEADER — barra compacta: logo + redes + botão de menu.
+     Os links de navegação ficam num painel que abre pelo botão.
+     ============================================================= */
+  .site-header {
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: max(12px, env(safe-area-inset-right, 0px));
+    width: auto;
+    height: 56px;
+    padding: 0 8px 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid var(--white-a12);
+    border-radius: 16px;
+    background: var(--black-a72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    pointer-events: auto;
+  }
+
+  .site-header__logo {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .site-header__icon,
+  .site-header__menu-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--white-a18);
+    border-radius: 10px;
+    background: var(--white-a03);
+    color: var(--white);
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .site-header__icon:active,
+  .site-header__menu-btn:active {
+    background: var(--white-a10);
+    border-color: var(--white-a40);
+  }
+
+  .site-header__icon svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    opacity: 0.85;
+  }
+
+  /* 3 risquinhos → X quando aberto */
+  .site-header__menu-btn {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .site-header__menu-btn span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 0.25s var(--ease-out-expo), opacity 0.2s;
+  }
+
+  .site-header.is-open .site-header__menu-btn span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .site-header.is-open .site-header__menu-btn span:nth-child(2) { opacity: 0; }
+  .site-header.is-open .site-header__menu-btn span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  /* Painel de navegação (a mesma <nav> do desktop) */
+  .navbar {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    width: auto;
+    height: auto;
+    display: none;
+    padding: 6px;
+    background: var(--surface-0);
+    border: 1px solid var(--white-a12);
+    border-radius: 16px;
+    box-shadow: 0 16px 40px var(--black-a60);
+    pointer-events: auto;
+  }
+
+  .site-header.is-open .navbar {
+    display: block;
+    animation: m-menu-in 0.22s var(--ease-out-expo);
+  }
+
+  @keyframes m-menu-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .navbar__links {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    width: 100%;
+  }
+
+  .navbar__links li a {
+    display: flex;
+    align-items: center;
+    padding: 16px 14px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    border-radius: 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .navbar__links li a:active { background: var(--white-a06); }
+
+  /* o prompt "›" fica sempre visível (não há hover no toque) */
+  .navbar__chev {
+    width: 1.4ch;
+    translate: 0 0;
+    opacity: 1;
+  }
+
+  /* =============================================================
+     HERO — uma coluna só, no mesmo eixo: a mão em cima e o nome
+     sobreposto à parte de baixo dela. A largura da mão acompanha a do
+     "ANDERSON" (4.6 × tamanho do nome), então os dois "casam" em
+     qualquer tela. O grupo todo centraliza entre o header e a stack.
+     ============================================================= */
+  #hero {
+    --hero-name-size: min(17vw, 96px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    min-height: 640px;
+    min-height: max(100svh, 640px);
+    padding: var(--m-header) 0 76px;
+  }
+
+  /* Mão: entra no fluxo, centralizada (fica ATRÁS do texto: z-index 5 < 6) */
+  #hero-image {
+    position: relative;
+    top: auto;
+    left: auto;
+    order: 1;
+    flex: none;
+    width: calc(var(--hero-name-size) * 4.6);
+    height: auto;
+    aspect-ratio: 800 / 880;
+    transform: rotate(17deg);
+  }
+
+  /* Texto: grupo centralizado, sobreposto à parte de baixo da mão */
+  .hero__name-block {
+    order: 2;
+    position: relative; /* sem z-index: cada texto empilha direto com a mão */
+    inset: auto;
+    top: calc(var(--hero-name-size) * -0.4); /* sobe o texto sem mexer na mão (NÃO usar transform aqui) */
+    flex: none;
+    width: fit-content;
+    max-width: calc(100% - 2 * var(--m-gutter));
+    height: auto;
+    margin: calc(var(--hero-name-size) * -1.7) 0 0;
+    padding: 0;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .hero__prazer {
+    margin: 0 0 4px;
+    font-size: calc(var(--hero-name-size) * 0.5);
+  }
+
+  .hero__anderson {
+    left: 0;
+    width: auto;
+    font-size: var(--hero-name-size);
+  }
+
+  .hero__da-silva {
+    z-index: 6; /* na frente da mão (no desktop fica atrás) */
+    margin: 4px 0 0 0.3em; /* a tabulação */
+    align-self: flex-start;
+    font-size: var(--hero-name-size);
+  }
+
+  .hero__subtitle {
+    display: block;
+    width: auto;
+    max-width: calc(var(--hero-name-size) * 4.5);
+    margin: 12px 0 0 calc(var(--hero-name-size) * 0.3);
+    align-self: flex-start;
+    white-space: normal;
+    text-wrap: balance;
+    font-size: clamp(12px, 3.4vw, 17px);
+    letter-spacing: 0.06em;
+  }
+
+  .hero__stack {
+    right: var(--m-gutter);
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* =============================================================
+     SOBRE MIM — 1) bio  2) foto  3) formação + tecnologias
+     A linha do tempo não aparece no celular.
+     ============================================================= */
+  #about {
+    display: block;
+    padding: calc(var(--m-header) + 28px) 0 56px;
+  }
+
+  .about__container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  /* As duas colunas "desaparecem" e seus filhos viram itens do container,
+     o que permite reordenar foto / formação / tecnologias com `order`. */
+  .about__left-col,
+  .about__right-col { display: contents; }
+
+  .timeline-v { display: none; }
+
+  .about__bio-title {
+    order: 1;
+    margin-bottom: 12px;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .about__bio-text,
+  .about__bio-text.bio-stream {
+    order: 2;
+    max-width: none;
+    margin-bottom: 32px;
+    font-size: 14px;
+    line-height: 1.75;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+
+  .about__photo {
+    order: 3;
+    flex: none;
+    width: 100%;
+    max-width: 340px;
+    align-self: center;
+    aspect-ratio: 4 / 5;
+    margin-bottom: 36px;
+  }
+
+  .about__education {
+    order: 4;
+    margin-top: 0;
+    margin-bottom: 32px;
+  }
+
+  .about__stack {
+    order: 5;
+    margin-top: 0;
+  }
+
+  .about__edu-title {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .about__edu-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 24px;
+  }
+
+  /* cada formação: marcador em cima, textos centralizados embaixo */
+  .about__edu-item {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .about__edu-dot { margin-top: 0; }
+
+  .about__chips { justify-content: center; }
+
+  /* =============================================================
+     PROJETOS — imagem em cima, texto embaixo
+     ============================================================= */
+  #projects {
+    display: block;
+    min-height: 0; /* sem altura mínima: o espaço vazio some */
+    padding: calc(var(--m-header) + 28px) 0 48px;
+  }
+
+  .projects__main {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .project__title {
+    max-width: 100%;
+    margin: 0 auto 16px;
+    font-size: 26px;
+    text-align: center;
+  }
+  .project__desc  { text-align: left; font-size: 14px; }
+  .project__carousel { margin-top: 24px; gap: 8px; }
+
+  .carousel__thumbs { min-width: 0; gap: 8px; }
+
+  .carousel__thumb {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 84px;
+    width: auto;
+    height: 56px;
+  }
+
+  /* ---- MODAL DO PROJETO: quase tela cheia ---- */
+  .project-modal__box {
+    width: calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+    height: calc(100vh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    min-height: 0;
+    border-radius: 12px;
+  }
+
+  /* Linha 1: contador centralizado (o ✕ fica no canto direito)
+     Linha 2: [‹ anterior]  [Visão Geral | Guia do Projeto]  [próximo ›] */
+  .project-modal__header {
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px 8px;
+    padding: 12px 14px;
+  }
+
+  .project-modal__counter {
+    position: static;
+    order: -1;
+    flex: 0 0 100%;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .project-modal__nav-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .project-modal__tabs {
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .project-modal__tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 9px 4px;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .project-modal__close {
+    top: 12px;
+    right: 12px;
+  }
+
+  .project-modal__panel { padding: 20px 16px; }
+
+  .project-overview__top {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .project-overview__info { margin-top: 0; }
+  .project-overview__title { font-size: 24px; }
+  .project-overview__desc,
+  .project-guide__markdown { font-size: 14px; }
+  .project-overview__desc  { text-align: left; }
+
+  /* Tooltip das estrelas ancorado na linha inteira (cabe na tela) */
+  .project-overview__difficulty { position: relative; }
+  .difficulty-star { position: static; }
+
+  .difficulty-star:hover,
+  .difficulty-star:focus-visible { transform: none; }
+
+  .difficulty-star:nth-child(n) .difficulty-star__tooltip {
+    left: 0;
+    right: auto;
+    width: min(260px, 100%);
+    transform: translateY(6px);
+  }
+
+  .difficulty-star:nth-child(n):hover .difficulty-star__tooltip,
+  .difficulty-star:nth-child(n):focus-visible .difficulty-star__tooltip {
+    transform: translateY(0);
+  }
+
+  /* =============================================================
+     CERTIFICADOS — galeria vira faixa rolável (arrasta pro lado)
+     ============================================================= */
+  /* Altura = conteúdo. Respiro curto em cima (projetos→certificados) e
+     embaixo (certificados→footer): dá a sensação de nova seção sem "buraco".
+     Ao abrir o último certificado o painel entra na lista e a seção cresce
+     junto, empurrando o footer. */
+  #certs {
+    min-height: 0;
+    padding: 48px 0 32px; /* 48 em cima (respiro dos projetos) · 32 embaixo (footer) */
+    align-items: flex-start;
+    scroll-margin-top: var(--m-header); /* o link do menu não esconde o conteúdo sob o header */
+  }
+
+  /* Cards empilhados, finos e de altura FIXA: a posição da logo/sigla e
+     do índice não depende do tamanho do título. */
+  .certs__row {
+    flex-direction: column;
+    height: auto;
+    gap: 10px;
+  }
+
+  .cert-card {
+    flex: none;
+    width: 100%;
+    height: 92px;
+    margin: 0;
+    padding: 0 16px 0 88px; /* 88 = 16 (borda) + 56 (logo) + 16 (respiro) */
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    border-radius: 12px;
+  }
+
+  .cert-card:hover,
+  .cert-card.active { flex-grow: 0; }
+
+  .cert-card__logo-wrap {
+    top: 50%;
+    left: 16px;
+    width: 56px;
+    height: 56px;
+    transform: translateY(-50%);
+  }
+
+  .cert-card__logo { width: 44px; height: 44px; }
+
+  .cert-card__logo-placeholder {
+    width: 56px;
+    height: 56px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .cert-card__title {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    line-height: 1.5;
+  }
+
+  /* no máximo 3 linhas: o card nunca cresce por causa do título */
+  .cert-card__title span {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  .cert-card__index {
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  /* O JS move o painel para logo DEPOIS do card clicado (dentro da lista) */
+  .cert-card { scroll-margin-top: calc(var(--m-header) + 8px); }
+
+  .cert-panel {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .cert-panel[hidden] { display: none; }
+
+  .cert-panel__preview { min-height: 0; padding: 16px; }
+
+  .cert-panel__info {
+    padding: 22px 18px;
+    border-left: 0;
+    border-top: 1px solid var(--white-a07);
+  }
+
+  .cert-panel__title { font-size: 22px; margin-bottom: 16px; }
+  .cert-panel__cta   { margin-top: 8px; }
+
+  .pdf-viewer__box {
+    width: 94vw;
+    height: 80vh;
+    height: 80dvh;
+  }
+
+  /* =============================================================
+     FOOTER — uma coluna
+     ============================================================= */
+  .site-footer {
+    padding-top: 48px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .site-footer__main {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    text-align: center;
+  }
+
+  .site-footer__cta {
+    flex: none;
+    width: 100%;
+  }
+
+  .site-footer__title { font-size: clamp(38px, 11vw, 60px); }
+  .site-footer__subtitle { letter-spacing: 0.2em; }
+
+  .site-footer__email-row {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .site-footer__email { overflow-wrap: anywhere; }
+
+  .site-footer__social {
+    align-items: center;
+    text-align: center;
+  }
+
+  .site-footer__social-links { justify-content: center; }
+
+  .site-footer__meta {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .site-footer__meta-item { white-space: normal; }
+
+  /* =============================================================
+     LOADING (boot) — coordenadas mais perto das bordas
+     ============================================================= */
+  .coord-tl, .coord-tr { top: calc(20px + env(safe-area-inset-top, 0px)); }
+  .coord-bl, .coord-br { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .coord-tl, .coord-bl { left: max(20px, env(safe-area-inset-left, 0px)); }
+  .coord-tr, .coord-br { right: max(20px, env(safe-area-inset-right, 0px)); }
+
+  /* =============================================================
+     PÁGINA 404
+     ============================================================= */
+  .notfound { padding: calc(96px + env(safe-area-inset-top, 0px)) 0 calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .notfound__logo { top: calc(16px + env(safe-area-inset-top, 0px)); left: var(--m-gutter); width: 38px; height: 38px; }
+  .notfound__code { font-size: min(30vw, 160px); }
+  .notfound__title { font-size: clamp(26px, 7vw, 36px); }
+  .notfound__terminal { font-size: 12px; }
+  .notfound__actions { gap: 18px 28px; }
+  .notfound__hud--tr { display: none; }
+  .notfound__hud--bl,
+  .notfound__hud--br { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); font-size: 9px; letter-spacing: 0.12em; }
+  .notfound__hud--bl { left: var(--m-gutter); }
+  .notfound__hud--br { right: var(--m-gutter); }
+}
+
+/* ---- Tablet em retrato: as duas formações lado a lado ---- */
+@media (min-width: 540px) and (max-width: 900px) {
+  .about__edu-grid {
+    grid-template-columns: repeat(2, minmax(0, max-content));
+    justify-content: center;
+    gap: 24px 56px;
+  }
+}
+
+/* ---- Telas de toque (sem hover): o que antes só aparecia ao passar o
+        mouse ganha uma pista visível ---- */
+@media (max-width: 900px) and (hover: none) {
+
+  /* sem blur/overlay "grudado" depois do toque */
+  #featured-project-image:hover .featured-project-image__content { filter: none; }
+  #featured-project-image:hover .featured-project-image__overlay { opacity: 0; }
+
+  /* rótulo fixo no lugar do "EXPLORAR PROJETO" do hover */
+  #featured-project-image::after {
+    content: 'TOQUE PARA EXPLORAR';
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 3;
+    padding: 6px 9px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--white-a80);
+    background: var(--black-a60);
+    border: 1px solid var(--white-a18);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 360px) {
+  :root { --m-gutter: max(16px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)); }
+  .site-header { left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); padding-right: 6px; }
+  .site-header__actions { gap: 6px; }
+  .site-header__icon,
+  .site-header__menu-btn { width: 38px; height: 38px; }
+  .project-modal__tab { font-size: 9.5px; letter-spacing: 0.03em; }
+}

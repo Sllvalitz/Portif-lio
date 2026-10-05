@@ -1,0 +1,330 @@
+/* =============================================================
+   s7-not-found.css — Página 404
+   Portfolio: Anderson da Silva
+
+   Hierarquia visual (mesmos tokens do resto do site):
+     1º  "404" + caret ........ --text-heading   (maior, com flicker CRT)
+     2º  título / CTA ......... --text-soft
+     3º  terminal / links ..... --text-muted / --nav-link
+     4º  rótulos HUD .......... --text-muted, 10px, só ornamento
+   Tudo aparece em sequência, em saltos secos (steps), sem fade.
+   ============================================================= */
+
+/* O global.css foi feito para a página principal (scroll-snap etc.) */
+html { scroll-snap-type: none; scroll-behavior: auto; }
+body { height: auto; min-height: 100%; }
+
+.notfound {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: calc(130 * var(--u)) 0 calc(100 * var(--u));
+  overflow: hidden;
+  font-family: var(--mono);
+  color: var(--text-muted);
+
+  /* Grid CRT estático — idêntico ao do Hero */
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* Colchetes de canto (HUD) */
+.notfound::before,
+.notfound::after {
+  content: '';
+  position: absolute;
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+  border: 0 solid var(--white-a32);
+  pointer-events: none;
+}
+.notfound::before { top: calc(14 * var(--u));    left: calc(14 * var(--u));  border-width: 1px 0 0 1px; }
+.notfound::after  { bottom: calc(14 * var(--u)); right: calc(14 * var(--u)); border-width: 0 1px 1px 0; }
+
+/* ---- Logo (volta ao início) ---- */
+.notfound__logo {
+  position: absolute;
+  top: calc(28 * var(--u));
+  left: calc(60 * var(--u));
+  width: max(36px, calc(46 * var(--u)));
+  height: max(36px, calc(46 * var(--u)));
+  border: 1px solid var(--white-a32);
+  background: var(--white-a03);
+  transition: border-color 0.2s, background 0.2s;
+}
+.notfound__logo:hover {
+  border-color: var(--white-a60);
+  background: var(--white-a06);
+}
+
+.notfound__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.notfound__logo-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.notfound__logo-ansi {
+  font-family: var(--display);
+  font-size: 58px;
+  font-weight: 800;
+  fill: var(--white);
+}
+
+.notfound__logo-labs {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 9px;
+  fill: var(--text-muted);
+}
+
+.notfound__logo-bars rect {
+  fill: var(--gray-mid);
+  opacity: 0.8;
+}
+
+.notfound__logo-bars rect:nth-child(-n + 5) {
+  fill: var(--accent-green);
+  opacity: 1;
+}
+
+.notfound__logo-bars rect:nth-child(6) {
+  animation: notfound-logo-bar-6 3.6s steps(1) infinite;
+}
+
+.notfound__logo-bars rect:nth-child(7) {
+  animation: notfound-logo-bar-7 3.6s steps(1) infinite;
+}
+
+.notfound__logo-bars rect:nth-child(8) {
+  animation: notfound-logo-bar-8 3.6s steps(1) infinite;
+}
+
+@keyframes notfound-logo-bar-6 {
+  0%, 16% { fill: var(--gray-mid); }
+  17%, 78% { fill: var(--accent-green); }
+  79%, 100% { fill: var(--gray-mid); }
+}
+
+@keyframes notfound-logo-bar-7 {
+  0%, 32% { fill: var(--gray-mid); }
+  33%, 78% { fill: var(--accent-green); }
+  79%, 100% { fill: var(--gray-mid); }
+}
+
+@keyframes notfound-logo-bar-8 {
+  0%, 48% { fill: var(--gray-mid); }
+  49%, 78% { fill: var(--accent-green); }
+  79%, 100% { fill: var(--gray-mid); }
+}
+
+/* ---- Rótulos HUD nos cantos ---- */
+.notfound__hud {
+  position: absolute;
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.notfound__hud--tr { top: calc(51 * var(--u)); right: calc(60 * var(--u)); transform: translateY(-50%); }
+.notfound__hud--bl { bottom: calc(30 * var(--u)); left:  calc(60 * var(--u)); }
+.notfound__hud--br { bottom: calc(30 * var(--u)); right: calc(60 * var(--u)); }
+
+/* ---- "404" ----
+   Mesma receita do nome no Hero: fonte mono 700, --text-heading,
+   caret 0.25em × 1em colado à base, flicker em duas camadas
+   (wrapper: queda forte 5s · dígitos: tremida 0.15s). */
+.notfound__code {
+  display: flex;
+  align-items: flex-end;
+  font-size: calc(280 * var(--u));
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.01em;
+  color: var(--text-heading);
+  animation: nf-big-flicker 5s steps(1) infinite;
+}
+
+.notfound__digits {
+  animation: nf-crt-flicker 0.15s steps(1) infinite;
+}
+
+.notfound__digit {
+  animation: nf-show 1ms steps(1) backwards;
+  animation-delay: calc(300ms + var(--i) * 170ms);
+}
+
+.notfound__code::after {
+  content: '';
+  width: 0.25em;
+  height: 1em;
+  margin-left: calc(4 * var(--u));
+  background: var(--accent-green);
+  animation: nf-caret 1s steps(1) infinite;
+}
+
+/* Estado base = visível. A animação só esconde ANTES de começar
+   (fill-mode: backwards) e, ao terminar, não segura nenhum valor —
+   nada depende de uma animação já finalizada para continuar visível. */
+@keyframes nf-show {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes nf-caret {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes nf-big-flicker {
+  0%, 90%, 92%, 94%, 100% { opacity: 1; }
+  91%, 93%                { opacity: 0.3; }
+}
+
+@keyframes nf-crt-flicker {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.97; }
+  75%  { opacity: 1; }
+}
+
+/* ---- Título ---- */
+.notfound__title {
+  margin-top: calc(32 * var(--u));
+  font-family: var(--display);
+  font-size: max(35px, calc(44 * var(--u)));
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--text-soft);
+}
+
+/* ---- Terminal ---- */
+.notfound__terminal {
+  margin-top: calc(28 * var(--u));
+  padding-left: calc(20 * var(--u));
+  border-left: 1px solid var(--white-a18);
+  font-size: max(11.7px, calc(13 * var(--u)));
+  line-height: 1.9;
+}
+
+.notfound__line {
+  animation: nf-show 1ms steps(1) backwards;
+  animation-delay: calc(1100ms + var(--d) * 380ms);
+  overflow-wrap: anywhere;
+}
+
+.notfound__prompt { color: var(--accent-green); margin-right: 0.9ch; }
+.notfound__key    { display: inline-block; min-width: 9ch; }
+.notfound__val    { color: var(--text-soft); }
+.notfound__val--err { color: var(--accent-green); }
+
+/* ---- Ações ---- */
+.notfound__actions {
+  margin-top: calc(44 * var(--u));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(20 * var(--u)) calc(57.6 * var(--u));
+  animation: nf-show 1ms steps(1) backwards;
+  animation-delay: 2700ms;
+}
+
+.notfound__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  padding: calc(12 * var(--u)) calc(20 * var(--u));
+  border: 1px solid var(--white-a25);
+  border-radius: calc(6 * var(--u));
+  background: transparent;
+  color: var(--text-soft);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+.notfound__cta:hover {
+  background: var(--white-a06);
+  border-color: var(--white-a50);
+}
+.notfound__cta svg {
+  display: block;
+  width: calc(14 * var(--u));
+  height: calc(14 * var(--u));
+}
+
+.notfound__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(14 * var(--u)) calc(38.4 * var(--u));
+}
+
+.notfound__links a {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: max(9.9px, calc(11 * var(--u)));
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--nav-link);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+.notfound__links a:hover,
+.notfound__links a:focus-visible { color: var(--nav-link-hover); }
+
+/* prompt "›" que desliza no hover — igual ao da navbar */
+.notfound__links a::before {
+  content: '›';
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  translate: -8px 0;
+  opacity: 0;
+  transition: width 0.3s, translate 0.3s cubic-bezier(.3, 1.3, .4, 1), opacity 0.25s;
+}
+.notfound__links a:hover::before,
+.notfound__links a:focus-visible::before {
+  width: 1.4ch;
+  translate: 0 0;
+  opacity: 1;
+}
+
+.notfound__cta:focus-visible,
+.notfound__links a:focus-visible,
+.notfound__logo:focus-visible {
+  outline: 2px solid var(--text-heading);
+  outline-offset: 3px;
+}
+
+/* ---- Telas estreitas ---- */
+
+/* ---- Movimento reduzido: tudo visível de uma vez, sem flicker/caret ---- */
+@media (prefers-reduced-motion: reduce) {
+  .notfound__code,
+  .notfound__digits,
+  .notfound__code::after { animation: none; }
+
+  .notfound__digit,
+  .notfound__line,
+  .notfound__actions {
+    opacity: 1;
+    animation: none;
+  }
+}

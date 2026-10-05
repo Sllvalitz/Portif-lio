@@ -1,0 +1,459 @@
+:root {
+  /* ═════════════ PALETA — fonte única de cores do site ═════════════
+     Nenhum outro arquivo CSS deve ter cor literal: tudo sai daqui.
+     Todas as cores são declaradas em oklch(). */
+
+  /* ---- Base ---- */
+  --black:      oklch(0 0 0);
+  --white:      oklch(1 0 0);
+  --gray-mid:   oklch(0.285 0 0);
+
+  /* ---- Superfícies escuras (painéis, cards, modais) ---- */
+  --surface-0:     oklch(0.1448 0 0);
+  --surface-photo: oklch(0.1505 0.0214 283.53);
+  --surface-1:     oklch(0.1591 0 0);
+  --surface-2:     oklch(0.1776 0 0);
+  --surface-hover: oklch(0.3211 0 0);
+
+  /* ---- Verde de acento (matiz 150) ---- */
+  --accent-green:       oklch(0.82 0.16 150);  /* caret, textos em destaque */
+  --text-heading:       oklch(0.85 0.19 150);  /* títulos de destaque */
+  --text-soft:          oklch(0.90 0.06 150);  /* texto secundário claro */
+  --text-muted:         oklch(0.65 0.02 150);  /* texto de apoio/corpo */
+  --nav-link:           var(--text-soft);      /* navbar — repouso */
+  --nav-link-hover:     var(--text-heading);   /* navbar — hover/ativo */
+  --grid-line:          oklch(0.62 0.06 150 / 0.16);  /* grid CRT do Hero */
+
+  /* ---- Footer ---- */
+  --footer-bg:     oklch(0.1 0.014 160);
+  --footer-email:  oklch(0.93 0.02 150);
+  --footer-muted:  var(--text-muted);
+  --footer-rule:   oklch(0.65 0.02 150 / 0.45);
+
+  /* ---- Branco com transparência (texto, bordas, fundos de vidro) ---- */
+  --white-a00: oklch(1 0 0 / 0);
+  --white-a018: oklch(1 0 0 / 0.018);
+  --white-a03: oklch(1 0 0 / 0.03);
+  --white-a04: oklch(1 0 0 / 0.04);
+  --white-a05: oklch(1 0 0 / 0.05);
+  --white-a06: oklch(1 0 0 / 0.06);
+  --white-a07: oklch(1 0 0 / 0.07);
+  --white-a08: oklch(1 0 0 / 0.08);
+  --white-a10: oklch(1 0 0 / 0.10);
+  --white-a12: oklch(1 0 0 / 0.12);
+  --white-a14: oklch(1 0 0 / 0.14);
+  --white-a15: oklch(1 0 0 / 0.15);
+  --white-a16: oklch(1 0 0 / 0.16);
+  --white-a18: oklch(1 0 0 / 0.18);
+  --white-a20: oklch(1 0 0 / 0.20);
+  --white-a22: oklch(1 0 0 / 0.22);
+  --white-a25: oklch(1 0 0 / 0.25);
+  --white-a28: oklch(1 0 0 / 0.28);
+  --white-a30: oklch(1 0 0 / 0.30);
+  --white-a32: oklch(1 0 0 / 0.32);
+  --white-a35: oklch(1 0 0 / 0.35);
+  --white-a40: oklch(1 0 0 / 0.40);
+  --white-a45: oklch(1 0 0 / 0.45);
+  --white-a50: oklch(1 0 0 / 0.50);
+  --white-a55: oklch(1 0 0 / 0.55);
+  --white-a60: oklch(1 0 0 / 0.60);
+  --white-a75: oklch(1 0 0 / 0.75);
+  --white-a80: oklch(1 0 0 / 0.80);
+  --white-a85: oklch(1 0 0 / 0.85);
+
+  /* ---- Preto com transparência (overlays, sombras) ---- */
+  --black-a40: oklch(0 0 0 / 0.40);
+  --black-a45: oklch(0 0 0 / 0.45);
+  --black-a50: oklch(0 0 0 / 0.50);
+  --black-a55: oklch(0 0 0 / 0.55);
+  --black-a60: oklch(0 0 0 / 0.60);
+  --black-a70: oklch(0 0 0 / 0.70);
+  --black-a72: oklch(0 0 0 / 0.72);
+
+  /* ═════════════ FONTES / ALIASES / MOVIMENTO ═════════════ */
+  --mono:    'IBM Plex Mono', monospace;
+  --display: 'Barlow Condensed', sans-serif;
+  --body:    'Space Grotesk', sans-serif;
+
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --dur-hover: 200ms;
+  --dur-carousel: 320ms;
+  --dur-modal: 350ms;
+  --dur-section: 600ms;
+
+  /* ═════════════ ESCALA FLUIDA (desktop-first) ═════════════
+     1 u = 1px na composição de referência 1920×960 (monitor Full HD
+     com a barra do navegador). A unidade segue o MENOR entre largura e
+     altura da janela, então a composição inteira cabe de notebook
+     pequeno (~1280×600) a ultrawide (3440×1440+), sempre com as mesmas
+     proporções. O piso/teto evitam extremos.
+       • dimensões, espaços e posições:  calc(N * var(--u))
+       • textos: max(piso, calc(N * var(--u))) — o piso mantém a leitura
+         em telas pequenas */
+  --u: clamp(0.56px, min(100vw / 1920, 100vh / 960), 1.6px);
+}
+
+/* ---- ACESSIBILIDADE: visível só para leitores de tela ---- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- RESET ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---- ROOT SCROLL ENGINE ----
+   'proximity' em vez de 'mandatory': as seções 1–4 (hero/about/skills/
+   projects) continuam encaixando suavemente quando o scroll passa perto
+   delas, mas o scroll não fica "preso" tentando voltar a um ponto de
+   snap quando o usuário desce para certificados/contato (que não têm
+   scroll-snap-align e, portanto, rolagem livre). */
+html {
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+  overflow-y: scroll;
+  height: 100%;
+  background: var(--black);
+
+  /* Esconde a scrollbar visualmente, sem desativar o scroll */
+  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;  /* IE/Edge legado */
+}
+
+/* Chrome, Safari, Edge (Blink/WebKit) */
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  font-family: var(--body);
+  background: var(--black);
+  color: var(--white);
+  height: 100%;
+}
+
+/* ---- SECTION BASE ---- */
+section {
+  scroll-snap-align: start;
+  min-height: 100vh; /* cresce se o conteúdo não couber (janelas muito baixas) */
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- CONTAINER (compartilhado por todas as seções) ----
+   Hierarquia: viewport → container centralizado → grid/flex das
+   colunas → largura de leitura dos blocos de texto (definida em
+   cada seção, não aqui). Não usar margin-left/padding-left avulso
+   por elemento — a seção inteira nasce dentro deste container. */
+.container {
+  width: calc(1280 * var(--u));
+  max-width: calc(100% - 48px); /* segurança em janelas muito estreitas */
+  margin-inline: auto;
+}
+
+/* Sentinela de fim de página (ver section-indicator.js) — precisa de
+   altura real para ser observável, mas não deve ocupar espaço visual */
+#bottom-sentinel {
+  height: 1px;
+  width: 100%;
+}
+
+/* ---- HEADER (fixo — visível em todos os tópicos) ----
+   Logo e menu são posicionados de forma independente: a logo fica
+   ancorada perto do canto superior esquerdo, e o menu é centralizado
+   em relação à VIEWPORT INTEIRA (left:50% do próprio .navbar, que é
+   full-width), não em relação ao espaço sobrando ao lado da logo. */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(130 * var(--u));
+  z-index: 40;
+  pointer-events: none;
+
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-out-expo) 0.1s;
+}
+
+/* nav-ready → sai do boot screen; a partir daí o header fica sempre visível */
+body.nav-ready .site-header {
+  opacity: 1;
+}
+
+.site-header__logo {
+  position: absolute;
+  top: calc(42 * var(--u));
+  left: calc(100 * var(--u));
+  width: max(36px, calc(46 * var(--u)));
+  height: max(36px, calc(46 * var(--u)));
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--white-a32);
+  background: var(--white-a03);
+
+  pointer-events: auto;
+  overflow: hidden;
+  text-decoration: none;
+
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.site-header__logo-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.site-header__logo-ansi {
+  font-family: var(--display);
+  font-size: 58px;
+  font-weight: 800;
+  fill: var(--white);
+}
+
+.site-header__logo-labs {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 9px;
+  fill: var(--text-muted);
+}
+
+.site-header__logo-bars rect {
+  fill: var(--gray-mid);
+  opacity: 0.8;
+}
+
+.site-header__logo-bars rect:nth-child(-n + 5) {
+  fill: var(--accent-green);
+  opacity: 1;
+}
+
+/* ANIMAÇÃO DA BARRA */
+
+.site-header__logo-bars rect:nth-child(6) {
+  animation: logo-bar-6 3.6s steps(1) infinite;
+}
+
+.site-header__logo-bars rect:nth-child(7) {
+  animation: logo-bar-7 3.6s steps(1) infinite;
+}
+
+.site-header__logo-bars rect:nth-child(8) {
+  animation: logo-bar-8 3.6s steps(1) infinite;
+}
+
+@keyframes logo-bar-6 {
+  0%, 16% {
+    fill: var(--gray-mid);
+  }
+  17%, 78% {
+    fill: var(--accent-green);
+  }
+  79%, 100% {
+    fill: var(--gray-mid);
+  }
+}
+
+@keyframes logo-bar-7 {
+  0%, 32% {
+    fill: var(--gray-mid);
+  }
+  33%, 78% {
+    fill: var(--accent-green);
+  }
+  79%, 100% {
+    fill: var(--gray-mid);
+  }
+}
+
+@keyframes logo-bar-8 {
+  0%, 48% {
+    fill: var(--gray-mid);
+  }
+  49%, 78% {
+    fill: var(--accent-green);
+  }
+  79%, 100% {
+    fill: var(--gray-mid);
+  }
+}
+
+.site-header__logo:hover {
+  border-color: var(--white-a60);
+  background: var(--white-a06);
+}
+
+.navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.navbar__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(57.6 * var(--u));
+  list-style: none;
+  pointer-events: auto;
+}
+
+.navbar__links li a {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  font-family:    var(--mono);
+  font-weight:    300;
+  font-size: max(10.1px, calc(11.2 * var(--u)));
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--nav-link);
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition: color 0.25s ease;
+}
+
+.navbar__links li a:hover,
+.navbar__links li a:focus-visible,
+.navbar__links li a.is-active {
+  color: var(--nav-link-hover);
+}
+
+/* Prompt de terminal ('›') que desliza da esquerda, como uma linha de
+   shell nova — aparece no hover/foco e permanece fixo no item ativo
+   (estado atualizado via JS em section-indicator.js). Ref.: CodeFronts
+   "CSS Blinking Cursor Underline Hover Effect", variante C. */
+.navbar__chev {
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  color: var(--nav-link-hover);
+  translate: -8px 0;
+  opacity: 0;
+  transition: width 0.3s, translate 0.3s cubic-bezier(.3,1.3,.4,1), opacity 0.25s;
+}
+
+.navbar__links li a:hover .navbar__chev,
+.navbar__links li a:focus-visible .navbar__chev,
+.navbar__links li a.is-active .navbar__chev {
+  width: 1.4ch;
+  translate: 0 0;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar__chev {
+    transition: none;
+  }
+}
+
+/* ---- SECTION INDICATOR ----
+   Indicador único e fixo (substitui os antigos v-labels estáticos por
+   seção). O texto é trocado via JS (section-indicator.js) conforme a
+   seção ativa muda durante o scroll livre — sem scroll-snap. Girado
+   90° (mesma lógica dos antigos v-labels: top:50% + translateX(-50%)
+   + rotate, sem precisar de translateY). Some após alguns segundos
+   parado (.is-idle) e volta a aparecer a cada troca de seção. */
+.section-indicator {
+  position: fixed;
+  left: calc(26 * var(--u));
+  top: 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  transform-origin: center center;
+  z-index: 35;
+  pointer-events: none;
+
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out-expo);
+}
+
+.section-indicator.is-visible {
+  opacity: 1;
+}
+
+.section-indicator.is-idle {
+  opacity: 0;
+}
+
+.section-indicator__text {
+  display: block;
+  font-family: var(--body);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  white-space: nowrap;
+
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.section-indicator.is-changing .section-indicator__text {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+/* ---- SCROLL REVEAL — entrada das seções + stagger ---- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--dur-section) var(--ease-out-expo),
+              transform var(--dur-section) var(--ease-out-expo);
+}
+
+[data-reveal].reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- REDUÇÃO DE MOVIMENTO ---- */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.site-header__logo:hover {
+  border-color: var(--white-a60);
+  background: var(--white-a06);
+}
+
+/* Barra de redes + botão de menu: só existem no mobile (ver mobile.css) */
+.site-header__actions { display: none; }

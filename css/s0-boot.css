@@ -1,0 +1,239 @@
+/* =============================================================
+   s0-boot.css — Kernel Bootstrap / Loading Screen
+   Portfolio: Anderson da Silva
+   ============================================================= */
+
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--black);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  /* Shutter: saída por dois painéis que fecham para cima/baixo */
+  transition: none;
+}
+
+/* Recarga pela logo do header: pula o loading (ver logo-reload.js) */
+.skip-loading #loading-screen {
+  display: none;
+}
+
+/* ── Shutter panels (fade-out via clip) ── */
+#loading-screen.hide {
+  animation: loading-fadeout 0.55s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+@keyframes loading-fadeout {
+  0%   { opacity: 1; transform: scaleY(1); }
+  60%  { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(0.96); pointer-events: none; }
+}
+
+/* ── Scanline overlay ── */
+#loading-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    var(--white-a018) 3px,
+    var(--white-a018) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Vignette ── */
+#loading-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center,
+    transparent 40%,
+    var(--black-a70) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════
+   TERMINAL NOISE — glyphs flutuantes
+══════════════════════════════════════ */
+.terminal-field {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.t-glyph {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: max(8.9px, calc(9.92 * var(--u)));
+  color: var(--white-a28);
+  white-space: nowrap;
+  line-height: 1.4;
+  animation: glyph-flicker var(--dur, 0.18s) step-start infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes glyph-flicker {
+  0%  { opacity: var(--op-a, 0.28); content: attr(data-a); }
+  50% { opacity: var(--op-b, 0.08); }
+  100%{ opacity: var(--op-a, 0.28); }
+}
+
+/* Grupo de texto estático rápido — VALIDATING / SYSTEM CHECK */
+.t-status {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: max(8.4px, calc(9.28 * var(--u)));
+  letter-spacing: 0.1em;
+  color: var(--white-a22);
+  animation: status-blink var(--blink, 0.4s) step-start infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes status-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100%{ opacity: 0; }
+}
+
+/* ══════════════════════════════════════
+   CENTRO — Nome + Portfólio
+══════════════════════════════════════ */
+.loading-center {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+}
+
+/* Linha fina acima do nome */
+.loading-center::before {
+  content: '';
+  display: block;
+  width: 1px;
+  height: calc(40 * var(--u));
+  background: var(--white-a35);
+  margin-bottom: calc(18 * var(--u));
+  animation: line-grow 0.5s var(--ease-out-expo) forwards;
+  transform-origin: top;
+}
+
+/* Linha fina abaixo de Portfólio */
+.loading-center::after {
+  content: '';
+  display: block;
+  width: 1px;
+  height: calc(40 * var(--u));
+  background: var(--white-a35);
+  margin-top: calc(18 * var(--u));
+  animation: line-grow 0.5s var(--ease-out-expo) 0.2s forwards;
+  transform-origin: bottom;
+}
+
+@keyframes line-grow {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+.loading-name {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: max(18.6px, calc(23.2 * var(--u)));
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--white);
+  opacity: 0;
+  animation: text-appear 0.5s ease forwards 0.1s;
+}
+
+.loading-divider {
+  width: calc(32 * var(--u));
+  height: 1px;
+  background: var(--white-a30);
+  margin: calc(14 * var(--u)) auto calc(14 * var(--u));
+  opacity: 0;
+  animation: text-appear 0.4s ease forwards 0.25s;
+}
+
+.loading-portfolio {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: max(11.2px, calc(12.48 * var(--u)));
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--white-a50);
+  opacity: 0;
+  animation: text-appear 0.4s ease forwards 0.35s;
+}
+
+@keyframes text-appear {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ── Saída (reverso da entrada) ──
+   Ordem de entrada foi: nome → divisor → portfólio
+   Ordem de saída é o espelho: portfólio → divisor → nome */
+@keyframes text-disappear {
+  from { opacity: 1; transform: translateY(0);   }
+  to   { opacity: 0; transform: translateY(6px); }
+}
+
+.loading-center.is-exiting .loading-portfolio {
+  animation: text-disappear 0.3s ease forwards 0s;
+}
+.loading-center.is-exiting .loading-divider {
+  animation: text-disappear 0.3s ease forwards 0.1s;
+}
+.loading-center.is-exiting .loading-name {
+  animation: text-disappear 0.3s ease forwards 0.2s;
+}
+
+/* As linhas finas acima/abaixo (::before/::after) encolhem junto,
+   no mesmo espelhamento de tempo do line-grow original */
+.loading-center.is-exiting::after {
+  animation: line-shrink 0.3s var(--ease-out-expo) 0s forwards;
+  transform-origin: bottom;
+}
+.loading-center.is-exiting::before {
+  animation: line-shrink 0.3s var(--ease-out-expo) 0.2s forwards;
+  transform-origin: top;
+}
+
+@keyframes line-shrink {
+  from { transform: scaleY(1); opacity: 1; }
+  to   { transform: scaleY(0); opacity: 0; }
+}
+
+/* ── Coordenadas cantos ── */
+.coord {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: max(8.6px, calc(9.6 * var(--u)));
+  letter-spacing: 0.12em;
+  color: var(--white-a20);
+  z-index: 3;
+  animation: coord-pulse 0.9s ease-in-out infinite alternate;
+}
+.coord-tl { top: calc(36 * var(--u)); left: calc(48 * var(--u)); }
+.coord-tr { top: calc(36 * var(--u)); right: calc(48 * var(--u)); text-align: right; }
+.coord-bl { bottom: calc(36 * var(--u)); left: calc(48 * var(--u)); }
+.coord-br { bottom: calc(36 * var(--u)); right: calc(48 * var(--u)); text-align: right; }
+
+@keyframes coord-pulse {
+  from { opacity: 0.15; }
+  to   { opacity: 0.45; }
+}

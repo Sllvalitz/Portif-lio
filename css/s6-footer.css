@@ -1,0 +1,198 @@
+/* =============================================================
+   s6-footer.css — Footer (contato + redes + metadados do site)
+   Portfolio: Anderson da Silva
+
+   Estrutura:
+     footer#footer.site-footer
+       .site-footer__inner.container
+         .site-footer__main
+           .site-footer__cta      → título, subtítulo, e-mail + caret
+           .site-footer__social   → redes sociais
+         p.site-footer__rule      → divisória tracejada
+         .site-footer__meta       → localização · última atualização · ©
+   ============================================================= */
+
+/* O footer NÃO é <section>: não herda height:100vh nem scroll-snap
+   do seletor genérico "section" do global.css. */
+.site-footer {
+  position: relative;
+  background: var(--footer-bg);
+  padding: calc(64 * var(--u)) 0 0;
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- BLOCO PRINCIPAL ---- */
+.site-footer__main {
+  margin-bottom: calc(40 * var(--u));
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(40 * var(--u));
+}
+
+.site-footer__cta { flex: 1; }
+
+.site-footer__title {
+  font-family: var(--display);
+  font-size: max(35.2px, calc(64 * var(--u)));
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: 0.03em;
+  color: var(--accent-green);
+  text-transform: uppercase;
+}
+
+.site-footer__subtitle {
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  letter-spacing: 0.3em;
+  color: var(--footer-muted);
+  text-transform: uppercase;
+  margin-top: calc(14 * var(--u));
+  margin-bottom: calc(30 * var(--u));
+}
+
+/* ---- E-MAIL + CARET ----
+   A linha define a fonte (mono 12.5px) para que o caret (unidades
+   ch/em) e o texto do e-mail partilhem a mesma métrica. O sublinhado
+   tracejado agora é text-decoration (não border-bottom), então a caixa
+   do link tem exatamente a altura do texto e o caret centraliza nela. */
+.site-footer__email-row {
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  font-family: var(--mono);
+  font-size: max(11.2px, calc(12.5 * var(--u)));
+  line-height: 1.4;
+}
+
+.site-footer__email-icon {
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.site-footer__email-line {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(4 * var(--u));
+}
+
+.site-footer__email {
+  color: var(--footer-email);
+  letter-spacing: 0.04em;
+  text-decoration: underline dashed;
+  text-decoration-color: var(--white-a25);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
+}
+
+.site-footer__email:hover {
+  color: var(--white);
+  text-decoration-style: solid;
+  text-decoration-color: currentColor;
+}
+
+/* Caret — steps(1), nunca fade. Cadência ~1.06s (padrão VT100) */
+.site-footer__caret {
+  display: inline-block;
+  width: 0.6ch;
+  height: 1.2em;
+  background: var(--accent-green);
+  animation: footer-caret-blink 1.06s steps(1, end) infinite;
+}
+
+@keyframes footer-caret-blink {
+  50% { opacity: 0; }
+}
+
+/* ---- REDES SOCIAIS ---- */
+.site-footer__social {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(20 * var(--u));
+}
+
+.site-footer__social-title {
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.3em;
+  color: var(--footer-muted);
+  text-transform: uppercase;
+}
+
+.site-footer__social-links {
+  display: flex;
+  gap: calc(12 * var(--u));
+}
+
+.site-footer__social-btn {
+  width: calc(52 * var(--u));
+  height: calc(52 * var(--u));
+  border: 1px solid var(--white-a18);
+  border-radius: calc(10 * var(--u));
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--white);
+  transition: background 0.2s, border-color 0.25s, transform 0.2s;
+}
+
+.site-footer__social-btn:hover {
+  background: var(--white-a07);
+  border-color: var(--white-a50);
+  transform: translateY(-3px);
+}
+
+.site-footer__social-btn svg {
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  fill: currentColor;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.site-footer__social-btn:hover svg { opacity: 1; }
+
+/* ---- DIVISÓRIA TRACEJADA ---- */
+.site-footer__rule {
+  height: 1px;
+  width: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--footer-rule) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+/* ---- METADADOS (3 itens) ---- */
+.site-footer__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: calc(4 * var(--u)) calc(32 * var(--u));
+  padding: calc(12 * var(--u)) 0;
+  line-height: 1.2;
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  letter-spacing: 0.08em;
+  color: var(--footer-muted);
+}
+
+.site-footer__meta-item { white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .site-footer__caret { animation: none; }
+}

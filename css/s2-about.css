@@ -1,0 +1,417 @@
+/* =============================================================
+   s2-about.css — About & Bio / Sobre Mim
+   Portfolio: Anderson da Silva
+   ============================================================= */
+
+#about {
+  background: var(--black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-block: calc(100 * var(--u)); /* respiro do header fixo */
+}
+
+/* ---- CONTAINER CENTRALIZADO ----
+   Largura herdada de .container (global.css) — este bloco só define
+   a distribuição interna em duas colunas (fr, não % — fr já desconta
+   o gap corretamente, evitando overflow). Proporção um pouco mais
+   generosa para a esquerda (~45/55) e gap reduzido para a foto
+   ganhar largura e se aproximar do bloco de texto. */
+.about__container {
+  display: grid;
+  grid-template-columns: 9fr 11fr;
+  gap: calc(48 * var(--u));
+  align-items: center;
+}
+
+/* ---- LEFT COLUMN ----
+   Linha do tempo vertical (mais recente no topo) + foto lado a lado. */
+.about__left-col {
+  display: flex;
+  align-items: stretch;
+  gap: calc(24 * var(--u));
+}
+
+.about__photo {
+  flex: 1;
+  width: auto;
+  max-width: calc(480 * var(--u));
+  aspect-ratio: 1 / 1.7;
+  background: var(--surface-photo);
+  position: relative;
+  overflow: hidden;
+}
+
+.about__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.about__photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  color: var(--white-a15);
+  letter-spacing: 0.2em;
+}
+
+/* ---- LINHA DO TEMPO VERTICAL ----
+   Ano à esquerda, linha/pontos à direita (colados na foto) — deixa
+   o bloco mais leve visualmente e dá mais respiro para a foto. */
+.timeline-v {
+  position: relative;
+  width: calc(100 * var(--u));
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(22 * var(--u)) 0 calc(6 * var(--u));
+}
+
+/* Seta no topo indicando a direção de avanço da linha do tempo */
+.timeline-v__arrow {
+  position: absolute;
+  top: 0;
+  right: calc(4 * var(--u));
+  transform: translateX(50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid var(--white);
+  opacity: 0.6;
+}
+
+.timeline-v__line {
+  position: absolute;
+  top: calc(16 * var(--u));
+  bottom: 0;
+  right: calc(4 * var(--u));
+  width: 1px;
+  background: var(--white);
+  opacity: 0.35;
+}
+
+.timeline-v__point {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(10 * var(--u));
+  cursor: pointer;
+
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo);
+}
+
+.timeline-v__point.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-v__dot {
+  width: calc(9 * var(--u));
+  height: calc(9 * var(--u));
+  border-radius: 50%;
+  background: var(--white);
+  flex-shrink: 0;
+  z-index: 2;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.timeline-v__point:hover .timeline-v__dot {
+  transform: scale(1.4);
+  box-shadow: 0 0 0 calc(6 * var(--u)) var(--white-a12);
+}
+
+/* Pulso de descoberta — dispara 1x via JS (timeline-affordance.js)
+   quando a seção entra na viewport pela primeira vez. Roda só
+   2 vezes e para; não é uma animação decorativa permanente. */
+@keyframes timeline-discover-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 var(--white-a40); }
+  40%  { transform: scale(1.5); box-shadow: 0 0 0 calc(8 * var(--u)) var(--white-a00); }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 var(--white-a00); }
+}
+
+.timeline-v__dot.discover-pulse {
+  animation: timeline-discover-pulse 1.1s ease-out 2;
+}
+
+/* Dica temporária "↳ HOVER NOS MARCADORES" — some sozinha após alguns segundos */
+.timeline-v__hint {
+  position: absolute;
+  top: calc(-24 * var(--u));
+  right: calc(4 * var(--u));
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.08em;
+  color: var(--white-a40);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.timeline-v__hint.is-visible {
+  opacity: 1;
+}
+
+.timeline-v__year {
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  font-weight: 600;
+  color: var(--white);
+  white-space: nowrap;
+}
+
+.timeline-v__card {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  margin-right: calc(14 * var(--u));
+  background: var(--surface-2);
+  border: 1px solid var(--white-a15);
+  padding: calc(12 * var(--u)) calc(16 * var(--u));
+  width: calc(220 * var(--u));
+  font-size: max(9.9px, calc(11 * var(--u)));
+  line-height: 1.5;
+  color: var(--text-muted);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 30;
+  white-space: normal;
+}
+
+.timeline-v__point:hover .timeline-v__card,
+.timeline-v__point:focus-visible .timeline-v__card {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.timeline-v__point:focus-visible {
+  outline: none; /* o destaque é o dot ampliado + o card aberto */
+}
+
+.timeline-v__point:focus-visible .timeline-v__dot {
+  transform: scale(1.4);
+  box-shadow: 0 0 0 calc(6 * var(--u)) var(--white-a12);
+}
+
+/* ---- RIGHT COLUMN ---- */
+.about__right-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0; /* evita que o texto force a coluna a crescer além do grid */
+}
+
+.about__bio-title {
+  font-family: var(--body);
+  font-size: max(14.4px, calc(18 * var(--u)));
+  font-weight: 700;
+  margin-bottom: calc(16 * var(--u));
+  color: var(--text-heading);
+}
+
+.about__bio-text {
+  font-size: max(11.7px, calc(13 * var(--u)));
+  line-height: 1.8;
+  color: var(--text-muted);
+  text-align: justify;
+  max-width: calc(650 * var(--u));
+}
+
+/* =============================================================
+   BIO STREAM — digitação com auto-correção (ref.: CodeFronts "LLM
+   Token Stream Glitch", sem o estado "thinking"/spinner/badge do
+   demo original — só o stream de caracteres + correção). Disparado
+   uma única vez via bio-stream.js quando a seção entra na viewport.
+   ============================================================= */
+.about__bio-text.bio-stream {
+  font-family: var(--mono);
+  /* Justificado também durante o stream (antes havia text-align: left
+     aqui, que sobrescrevia o justify de .about__bio-text). */
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.bio-stream__char {
+  display: inline;
+  /* white-space normal: com pre-wrap o navegador pode deixar de
+     justificar o parágrafo. Os espaços não colapsam porque cada
+     espaço fica entre dois caracteres não-espaço. */
+  white-space: normal;
+}
+
+/* Token "errado" — aparece, recebe um risco vermelho, depois some */
+.bio-stream__wrong {
+  position: relative;
+  display: inline-block;
+  white-space: pre;
+  color: var(--accent-green);
+}
+
+.bio-stream__wrong::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 1.5px;
+  background: var(--text-heading);
+}
+
+.bio-stream__wrong.is-striking::after {
+  animation: bio-stream-strike 280ms cubic-bezier(.65,0,.35,1) forwards;
+}
+
+@keyframes bio-stream-strike {
+  to { width: 100%; }
+}
+
+.bio-stream__wrong.is-removing {
+  animation: bio-stream-collapse 200ms ease forwards;
+}
+
+@keyframes bio-stream-collapse {
+  to { opacity: 0; max-width: 0; }
+}
+
+/* Cursor — steps(1), nunca fade; pisca enquanto digita, some no final */
+.bio-stream__cursor {
+  display: inline-block;
+  width: calc(7 * var(--u));
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--accent-green);
+  animation: bio-stream-blink 0.9s steps(1) infinite;
+}
+
+.bio-stream__cursor.is-flickering {
+  animation: bio-stream-flicker 110ms steps(1) 3;
+}
+
+@keyframes bio-stream-blink {
+  50% { opacity: 0; }
+}
+
+@keyframes bio-stream-flicker {
+  0%, 100% { opacity: 1; background: var(--accent-green); }
+  50%      { opacity: 0; background: var(--text-heading); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bio-stream__cursor { animation: none; }
+  .bio-stream__wrong::after { animation: none; }
+}
+
+/* ---- EDUCATION ---- */
+.about__education {
+  margin-top: calc(32 * var(--u));
+}
+
+.about__edu-title {
+  font-family: var(--body);
+  font-size: max(16px, calc(20 * var(--u)));
+  font-weight: 700;
+  margin-bottom: calc(20 * var(--u));
+  color: var(--text-heading);
+}
+
+.about__edu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(40 * var(--u));
+}
+
+.about__edu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(12 * var(--u));
+}
+
+.about__edu-dot {
+  width: calc(10 * var(--u)); height: calc(10 * var(--u));
+  border-radius: 50%;
+  background: var(--white);
+  margin-top: calc(4 * var(--u));
+  flex-shrink: 0;
+}
+
+.about__edu-year {
+  font-size: max(10.8px, calc(12 * var(--u)));
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.about__edu-inst {
+  font-size: max(10.8px, calc(12 * var(--u)));
+  font-weight: 700;
+  color: var(--text-soft);
+  margin-top: 2px;
+}
+
+.about__edu-course {
+  font-size: max(9.9px, calc(11 * var(--u)));
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ---- STACK (chips — movido da antiga seção Competências) ---- */
+.about__stack {
+  margin-top: calc(40 * var(--u));
+}
+
+.about__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(10 * var(--u));
+}
+
+.about__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  background: var(--gray-mid);
+  border: 1px solid var(--white-a06);
+  border-radius: calc(8 * var(--u));
+  padding: calc(8 * var(--u)) calc(13 * var(--u));
+  cursor: default;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.about__chip:hover {
+  background: var(--surface-hover);
+  border-color: var(--white-a16);
+}
+
+.about__chip-icon {
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
+  flex-shrink: 0;
+}
+
+.about__chip-icon {
+  object-fit: contain;
+  display: block;
+}
+
+.about__chip-label {
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  color: var(--white);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+

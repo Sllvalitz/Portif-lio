@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>404 - Página não encontrada</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Cpath d='M8 9l8 7-8 7' fill='none' stroke='%236ee787' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='18' y='21' width='8' height='3' fill='%236ee787'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;700&family=Barlow+Condensed:wght@700&display=swap" rel="stylesheet">
+
+<!-- Caminhos absolutos (/...): a 404 pode ser servida a partir de qualquer URL -->
+<link rel="stylesheet" href="/css/global.css">
+<link rel="stylesheet" href="/css/s7-not-found.css">
+<link rel="stylesheet" href="/css/mobile.css">
+<script src="/js/not-found.js" defer></script>
+</head>
+
+<body>
+<main class="notfound">
+
+  <a class="notfound__logo" href="/" aria-label="Voltar ao início">
+    <svg class="notfound__logo-svg" viewBox="0 0 120 120" role="img" aria-label="Ansi Labs">
+      <text x="60" y="64" class="notfound__logo-ansi" text-anchor="middle">ANSI</text>
+
+      <g class="notfound__logo-bars">
+        <rect x="13" y="76" width="10" height="7"/>
+        <rect x="25" y="76" width="10" height="7"/>
+        <rect x="37" y="76" width="10" height="7"/>
+        <rect x="49" y="76" width="10" height="7"/>
+        <rect x="61" y="76" width="10" height="7"/>
+        <rect x="73" y="76" width="10" height="7"/>
+        <rect x="85" y="76" width="10" height="7"/>
+        <rect x="97" y="76" width="10" height="7"/>
+      </g>
+
+      <text x="60" y="108" class="notfound__logo-labs" text-anchor="middle">LABS</text>
+    </svg>
+  </a>
+  <span class="notfound__hud notfound__hud--tr" aria-hidden="true">ERR_404 · SINAL PERDIDO</span>
+  <span class="notfound__hud notfound__hud--bl" aria-hidden="true">São Luís UTC-3</span>
+  <span class="notfound__hud notfound__hud--br" aria-hidden="true">&copy; 2026 Anderson da Silva</span>
+
+  <div class="notfound__inner container">
+
+    <p class="notfound__code" aria-hidden="true"><span class="notfound__digits"><span class="notfound__digit" style="--i:0">4</span><span class="notfound__digit" style="--i:1">0</span><span class="notfound__digit" style="--i:2">4</span></span></p>
+
+    <h1 class="notfound__title"><span class="sr-only">Erro 404: </span>Página não encontrada</h1>
+
+    <div class="notfound__terminal">
+      <p class="notfound__line" style="--d:0"><span class="notfound__prompt">›</span><span class="notfound__key">GET</span><span class="notfound__val" id="nf-path">/</span></p>
+      <p class="notfound__line" style="--d:1"><span class="notfound__prompt">›</span><span class="notfound__key">status</span><span class="notfound__val notfound__val--err">404 NOT_FOUND</span></p>
+      <p class="notfound__line" style="--d:2"><span class="notfound__prompt">›</span><span class="notfound__key">rota</span><span class="notfound__val">sem sinal</span></p>
+      <p class="notfound__line" style="--d:3"><span class="notfound__prompt">›</span><span class="notfound__key">sugestão</span><span class="notfound__val">voltar ao início</span></p>
+    </div>
+
+    <div class="notfound__actions">
+      <a class="notfound__cta" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        Voltar ao início
+      </a>
+      <nav class="notfound__links" aria-label="Seções do site">
+        <a href="/#about">Sobre</a>
+        <a href="/#projects">Projetos</a>
+        <a href="/#certs">Certificados</a>
+        <a href="/#footer">Contato</a>
+      </nav>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>

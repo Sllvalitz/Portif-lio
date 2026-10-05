@@ -1,0 +1,276 @@
+/* =============================================================
+   s1-hero.css — Hero HUD / Boas Vindas
+   Portfolio: Anderson da Silva
+   ============================================================= */
+
+#hero {
+  height: 100vh; /* composição fixa na altura da janela */
+  /* Grid CRT estático: linhas de 1px em células de 30×30px.
+     Fica no próprio background da seção, portanto sempre atrás de
+     todo o conteúdo do Hero — sem animação, movimento ou parallax. */
+  background-color: transparent;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero__name-block {
+  /* Centralizado SEM transform e SEM z-index: assim este bloco não cria
+     um contexto de empilhamento próprio, e cada texto abaixo se empilha
+     diretamente com #hero-image (z-index 5):
+       DA SILVA (4) < hero-image (5) < Prazer / ANDERSON / subtítulo (6) */
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  /* Palco de 1920×600 (em u), centralizado: em ultrawide a composição
+     fica no meio e o grid CRT do fundo continua nas laterais. */
+  width: calc(1920 * var(--u));
+  height: calc(600 * var(--u));
+  --hero-col-x: calc(1120 * var(--u)); /* início da coluna de "DA SILVA" e do subtítulo */
+  --hero-name-w: calc(128 * 4.42 * var(--u)); /* largura de "DA SILVA": 8 car. mono − letter/word-spacing */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero__prazer {
+  font-family: var(--display);
+  font-size: calc(64 * var(--u));
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--text-soft);
+
+  position: relative;
+  z-index: 6;
+  margin-left: calc(300 * var(--u));
+  margin-top: calc(-100 * var(--u));
+}
+
+.hero__anderson {
+  font-family: var(--mono);
+  font-size: calc(128 * var(--u));
+  font-weight: 700; /* IBM Plex Mono vai até 700 */
+  line-height: 0.9;
+  color: var(--text-heading);
+  letter-spacing: -0.01em;
+  width: calc(700 * var(--u));
+  position: relative;
+  z-index: 6;
+
+  position: relative;
+  left: calc(300 * var(--u));
+  top: 0;
+}
+
+.hero__da-silva {
+  font-family: var(--mono);
+  font-size: calc(128 * var(--u));
+  font-weight: 700; /* IBM Plex Mono vai até 700 */
+  line-height: 0.9;
+  color: var(--text-heading);
+  letter-spacing: -0.01em;
+  word-spacing: -0.3em;
+  align-self: flex-start;
+  position: relative;
+  z-index: 4; /* atrás da hero-image (z-index 5) */
+
+  margin-left: var(--hero-col-x);
+  margin-top: calc(10 * var(--u));
+}
+
+.hero__subtitle {
+  font-family: var(--body);
+  font-size: max(11px, calc(18 * var(--u)));
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  color: var(--text-soft);
+
+  position: relative;
+  z-index: 6;
+  /* Mesma coluna e mesma largura do "DA SILVA": o texto termina na borda
+     direita dele. flex-end + nowrap: se faltar espaço, o excesso vaza
+     para a ESQUERDA, nunca além do "DA SILVA". */
+  display: flex;
+  justify-content: flex-end;
+  white-space: nowrap;
+  align-self: flex-start;
+  width: var(--hero-name-w);
+  margin-left: var(--hero-col-x);
+  margin-top: calc(10 * var(--u));
+}
+
+/* ---- 3D ASSET SLOT ---- */
+#hero-image {
+  position: absolute;
+  top: calc(50% + 48 * var(--u));   /* 55% de 960 = 480 + 48 */
+  left: calc(50% - 38.4 * var(--u)); /* 48% do palco de 1920 */
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform: translate(-42%, -50%) rotate(17deg);
+  width: calc(800 * var(--u));
+  height: calc(880 * var(--u));
+}
+
+#hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* ---- STACK (barras decorativas + rótulo) ---- */
+.hero__stack {
+  position: absolute;
+  bottom: calc(40 * var(--u));
+  right: calc(60 * var(--u));
+  text-align: right;
+  z-index: 20;
+}
+
+.stack__bars {
+  width: calc(200 * var(--u));
+  height: calc(42 * var(--u));
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 1.5px;
+  margin-bottom: calc(6 * var(--u));
+  overflow: hidden;
+}
+
+.stack__bar {
+  background: var(--white);
+  flex-shrink: 0;
+}
+
+.stack__label {
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.35em;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* =============================================================
+   ANIMAÇÕES DO HERO — só rodam depois do Loading
+   (hero-typing.js adiciona .hero-live em #hero ao fim do loading)
+   ============================================================= */
+
+/* ---- DIGITAÇÃO: "ANDERSON" / "DA SILVA" ----
+   Todos os caracteres já estão no DOM (opacity 0) e são revelados um a
+   um — o texto reserva seu espaço final desde o início, então nada
+   desloca/redimensiona durante a digitação. */
+.hero__anderson,
+.hero__da-silva {
+  white-space: nowrap;
+}
+
+.hero__char {
+  opacity: 0;
+}
+
+.hero__char.is-typed {
+  opacity: 1;
+}
+
+/* ---- CARET ----
+   Tamanho: 0.25em × 1em, 4px de afastamento,
+   alinhado à base da linha, piscando 1s em steps(1). Posicionado em
+   absoluto (left calculado pelo hero-typing.js) para NÃO alterar a
+   altura da linha nem empurrar o layout. Fica fora de .hero__name-text,
+   dentro do wrapper — igual ao cursor do exemplo. */
+.hero__caret {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0.25em;
+  height: 1em;
+  margin-left: calc(4 * var(--u));
+  background: var(--accent-green);
+  pointer-events: none;
+  animation: hero-caret-blink 1s steps(1) infinite;
+}
+
+@keyframes hero-caret-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ---- FLICKER CRT — "ANDERSON DA SILVA" ----
+   Mesmo funcionamento do "NEURAL LINK" (tempos, steps e keyframes),
+   sem a cor/glow. Duas camadas de opacidade aninhadas:
+     • wrapper (.hero__anderson / .hero__da-silva): queda forte, ciclo 5s
+     • texto interno (.hero__name-text): tremida leve, ciclo 0.15s */
+.hero-live .hero__anderson,
+.hero-live .hero__da-silva {
+  animation: hero-name-big-flicker 5s steps(1) infinite;
+}
+
+@keyframes hero-name-big-flicker {
+  0%, 90%, 92%, 94%, 100% { opacity: 1; }
+  91%, 93%                { opacity: 0.3; }
+}
+
+.hero-live .hero__name-text {
+  animation: hero-name-crt-flicker 0.15s steps(1) infinite;
+}
+
+@keyframes hero-name-crt-flicker {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.97; }
+  75%  { opacity: 1; }
+}
+
+/* ---- SUBTÍTULO — entra depois de "DA SILVA" ----
+   Fica oculto até TODOS os .hero__char de "DA SILVA" terem .is-typed
+   (:has — sem depender do JS). Aí liga em salto seco (steps, como o
+   resto do HUD) e, ao fim da entrada, começa o flicker contínuo.
+   Sem suporte a :has, o subtítulo simplesmente fica visível. */
+@supports selector(:has(*)) {
+  .hero__subtitle { opacity: 0; }
+}
+
+.hero-live .hero__da-silva:has(.hero__char):not(:has(.hero__char:not(.is-typed))) ~ .hero__subtitle {
+  opacity: 1;
+  animation:
+    hero-subtitle-in 600ms steps(1) backwards,
+    hero-subtitle-flicker 2s linear 600ms infinite;
+}
+
+@keyframes hero-subtitle-in {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  30%  { opacity: 0.2; }
+  45%  { opacity: 1; }
+  60%  { opacity: 0.5; }
+  75%  { opacity: 1; }
+}
+
+/* ---- FLICKER — subtítulo ----
+   Mesmo funcionamento do "847.3 THz": ciclo 2s linear, queda a 0.4
+   em 90% e retorno gradual até o fim do ciclo. */
+
+@keyframes hero-subtitle-flicker {
+  0%, 89%, 100% { opacity: 1; }
+  90%           { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__char { opacity: 1; }
+  .hero__caret,
+  .hero-live .hero__anderson,
+  .hero-live .hero__da-silva,
+  .hero-live .hero__name-text,
+  .hero-live .hero__da-silva ~ .hero__subtitle { animation: none; }
+  .hero__subtitle { opacity: 1; }
+}
