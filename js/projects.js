@@ -254,6 +254,27 @@ setProject(0, false);
   let lastFocusedEl = null;
   let scrollLockY = 0;
   const TRANSITION_MS = 400; // deve bater com .project-modal (CSS)
+  let hideTimer = null;
+  let closing = false;
+  let closeToHome = false; // acesso direto + setas: a entrada-base também é /projetos/..., precisa virar "/"
+
+  /* ---- DEEP LINKING (History API) ----
+     URL do projeto = /projetos/<id>, onde <id> é o `id` do array `projects`
+     (fonte única). history.state = { depth } guarda quantas entradas o modal
+     empilhou desde que abriu: fechar volta exatamente essa quantidade, então
+     o histórico nunca fica poluído e o Voltar do navegador não reabre o modal.
+     `landed` marca sessões iniciadas por acesso direto à URL do projeto. */
+  const ROUTE_PREFIX = '/projetos/';
+  const projectPath = (idx) => ROUTE_PREFIX + encodeURIComponent(projects[idx].id);
+  const currentDepth = () => (history.state && history.state.depth) || 0;
+
+  function indexFromLocation() {
+    const m = location.pathname.match(/^\/projetos\/([^/]+)\/?$/);
+    if (!m) return -1;
+    let slug;
+    try { slug = decodeURIComponent(m[1]); } catch (e) { return -1; }
+    return projects.findIndex((p) => p.id === slug);
+  }
 
   const overviewImageEl = document.getElementById('overview-image');
   const overviewImagePh = document.getElementById('overview-image-placeholder');
@@ -470,7 +491,13 @@ function renderDifficultyStars(difficulty) {
   function navigateModal(delta) {
     const next = modalIndex + delta;
     if (next < 0 || next >= projects.length) return;
+    if (location.pathname !== projectPath(next)) {
+      history.pushState({ depth: currentDepth() + 1, landed: !!(history.state && history.state.landed) }, '', projectPath(next));
+    }
+    goToProject(next);
+  }
 
+  function goToProject(next) {
     // Só o conteúdo interno faz a transição — o modal em si não reabre.
     const activePanel = activeTab === 'overview'
       ? panelOverview.querySelector('.project-overview')
@@ -519,7 +546,16 @@ function renderDifficultyStars(difficulty) {
     }
   }
 
+  // Abertura pelo usuário: mostra o modal e empilha /projetos/<id>.
   function openProjectModal(idx) {
+    if (closing || modal.classList.contains('open')) return; // já aberto ou fechando: não empilha outra entrada
+    showProjectModal(idx);
+    history.pushState({ depth: 1 }, '', projectPath(idx));
+  }
+
+  function showProjectModal(idx) {
+    clearTimeout(hideTimer);
+    closing = false;
     modalIndex = idx;
     switchTab('overview');
     renderModalContent();
@@ -541,7 +577,22 @@ function renderDifficultyStars(difficulty) {
     btnClose.focus();
   }
 
+  // Fechamento pelo usuário: desfaz as entradas empilhadas pelo modal (o
+  // popstate fecha de fato). Sem entradas (acesso direto), troca a URL por "/".
   function closeProjectModal() {
+    if (closing || modal.hidden) return;
+    const depth = currentDepth();
+    if (depth > 0) {
+      closing = true;
+      closeToHome = !!(history.state && history.state.landed);
+      history.go(-depth);
+    } else {
+      history.replaceState(null, '', '/');
+      hideProjectModal();
+    }
+  }
+
+  function hideProjectModal() {
     modal.classList.remove('open');
     document.removeEventListener('keydown', handleModalKeydown);
     unlockPageScrollForModal();
@@ -549,10 +600,42 @@ function renderDifficultyStars(difficulty) {
     // Retoma o autoplay do carrossel principal exatamente de onde estava
     resetTimer();
 
-    setTimeout(() => {
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
       modal.hidden = true;
+      closing = false;
       if (lastFocusedEl) lastFocusedEl.focus();
     }, TRANSITION_MS);
+  }
+
+  // Sincroniza o modal com a URL (Voltar/Avançar e carga inicial).
+  function syncModalWithLocation() {
+    if (closeToHome) { // chegou na entrada de acesso direto: troca por "/" e fecha
+      closeToHome = false;
+      history.replaceState(null, '', '/');
+      hideProjectModal();
+      return;
+    }
+    const idx = indexFromLocation();
+    const isOpen = !modal.hidden && modal.classList.contains('open');
+    if (idx < 0) {
+      if (isOpen) hideProjectModal();
+    } else if (!isOpen) {
+      showProjectModal(idx);
+    } else if (idx !== modalIndex) {
+      goToProject(idx);
+    }
+  }
+
+  window.addEventListener('popstate', syncModalWithLocation);
+
+  // Acesso direto a /projetos/<slug>: abre o projeto; slug desconhecido volta a "/".
+  if (location.pathname.indexOf(ROUTE_PREFIX) === 0) {
+    if (indexFromLocation() >= 0) {
+      if (!history.state) history.replaceState({ depth: 0, landed: true }, '', location.pathname);
+      syncModalWithLocation();
+    }
+    else history.replaceState(null, '', '/');
   }
 
   btnPrev.addEventListener('click', () => navigateModal(-1));

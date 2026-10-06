@@ -10,6 +10,22 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
   Strict-Transport-Security: max-age=31536000
 
+# ── DEEP LINKING: /projetos/<slug> ─────────────────────────────────────
+# O JavaScript só cuida da History API. Num acesso direto (ou F5) a
+# /projetos/legacy-server o SERVIDOR precisa responder com o index.html
+# (status 200, sem redirecionar, mantendo a URL). Slugs = `id` em js/projects.js.
+# Só os slugs válidos são reescritos; qualquer outra URL continua dando 404.
+#
+# Netlify / Cloudflare Pages — arquivo `_redirects` na raiz (não vai aqui):
+#   /projetos/legacy-server  /index.html  200
+# Nginx:
+#   location = /projetos/legacy-server { try_files /index.html =404; }
+# Vercel (vercel.json): "rewrites": [{ "source": "/projetos/legacy-server", "destination": "/index.html" }]
+# GitHub Pages: não suporta rewrite — o acesso direto não funciona nesse host.
+# Ao adicionar um projeto novo em js/projects.js, adicione a regra dele também.
+/projetos/*
+  Cache-Control: no-cache
+
 # HTML sempre revalidado; CSS/JS 1h (os nomes não têm hash de versão,
 # então cache longo exigiria renomear a cada deploy); assets 30 dias.
 /
