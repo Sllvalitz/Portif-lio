@@ -9,7 +9,8 @@
  *     titulo        {string}  — Nome do certificado (use \n para quebra)
  *     sigla         {string}  — Texto de fallback se logo_path estiver vazio
  *     logo_path     {string}  — Caminho para o logo da instituição
- *     full_cert_path{string}  — Imagem de preview do certificado (card + painel + visualizador)
+ *     thumb_path    {string}  — Miniatura leve (640px) usada só no card da galeria
+ *     full_cert_path{string}  — Imagem em alta resolução (painel + visualizador, carregada sob demanda)
  *     pdf_path      {string}  — Caminho para o PDF original (botão "Baixar PDF")
  *     instituicao   {string}  — Nome da instituição
  *     carga_horaria {string}  — Ex: "800 horas" (deixe "" se N/A)
@@ -25,16 +26,18 @@ const CERTS = [
     titulo: "Capacitação em Sistemas Embarcados e Inteligência Artificial na Borda",
     sigla: "PNAAT",
     logo_path: "",
+    thumb_path: "assets/imagens/certs/thumbs/pnaat-embarcados-ia.webp",
     full_cert_path: "assets/imagens/certs/Capacitação_em_Sistemas_Embarcados_e_Inteligência_Artificial_na_Borda_74H.webp",
     pdf_path: "assets/pdfs/Capacitação_em_Sistemas_Embarcados_e_Inteligência_Artificial_na_Borda_74H.pdf",
     instituicao: "FIT - Instituto de Tecnologia",
-    carga_horaria: "72 Horas",
+    carga_horaria: "74 Horas",
     conclusao: "2026"
   },
   {
     titulo: "Trilha de Fundamentos em IoT e Edge AI",
     sigla: "PNAAT",
     logo_path: "",
+    thumb_path: "assets/imagens/certs/thumbs/pnaat-iot-edge-ai.webp",
     full_cert_path: "assets/imagens/certs/Trilha_de_Fundamentos_em_IoT_e _Edge_AI_28H.webp",
     pdf_path: "assets/pdfs/Trilha_de_Fundamentos_em_IoT_e _Edge_AI_28H.pdf",
     instituicao: "FIT - Instituto de Tecnologia",
@@ -45,6 +48,7 @@ const CERTS = [
     titulo: "TXM Challenge Multicenter Negócios e Eventos",
     sigla: "TXM",
     logo_path: "",
+    thumb_path: "assets/imagens/certs/thumbs/txm-challenge.webp",
     full_cert_path: "assets/imagens/certs/TXM_Challenge_Multicenter_Negócios_e_Eventos_90H.webp",
     pdf_path: "assets/pdfs/TXM_Challenge_Multicenter_Negócios_e_Eventos_90H.pdf",
     instituicao: "TXM Methods",
@@ -55,6 +59,7 @@ const CERTS = [
     titulo: "1º Jornada de Inovação da Agricultura Familiar no Maranhão",
     sigla: "1° JSAF",
     logo_path: "",
+    thumb_path: "assets/imagens/certs/thumbs/jornada-saf.webp",
     full_cert_path: "assets/imagens/certs/Jornada_de_Inovação_da_Agricultura_Familiar_SAF_Maranhão_e_Agência_Marandu_30H.webp",
     pdf_path: "assets/pdfs/Jornada_de_Inovação_da_Agricultura_Familiar_SAF_Maranhão_e_Agência_Marandu_30H.pdf",
     instituicao: "Agência Marandu",
@@ -65,6 +70,7 @@ const CERTS = [
     titulo: "Programação \n Back-End",
     sigla: "SECTI",
     logo_path: "",
+    thumb_path: "assets/imagens/certs/thumbs/back-end-400h.webp",
     full_cert_path: "assets/imagens/certs/Programação_Back_End_400H.webp",
     pdf_path: "assets/pdfs/Programação_Back_End_400H.pdf",
     instituicao: "Secretaria de Ciência, Tecnologia e Inovação",
@@ -105,6 +111,31 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ============================================================
    BUILD CARDS
    ============================================================ */
+/* Aplica a imagem de fundo do card só quando ele está perto da tela
+   (CSS background-image não suporta loading="lazy"). */
+let cardBgObserver = null;
+
+function applyCardBg(bg) {
+  if (bg && bg.dataset.bg) {
+    bg.style.backgroundImage = `url('${bg.dataset.bg}')`;
+    delete bg.dataset.bg;
+  }
+}
+
+function observeCardBg(card, bg) {
+  if (!('IntersectionObserver' in window)) { applyCardBg(bg); return; }
+  if (!cardBgObserver) {
+    cardBgObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        applyCardBg(entry.target.querySelector('.cert-card__bg'));
+        cardBgObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: '400px 0px' });
+  }
+  cardBgObserver.observe(card);
+}
+
 function buildCertCards() {
   const row = document.getElementById('certs-row');
   if (!row) return;
@@ -123,9 +154,8 @@ function buildCertCards() {
 
     const bg = document.createElement('div');
     bg.className = 'cert-card__bg';
-    if (cert.full_cert_path) {
-      bg.style.backgroundImage = `url('${cert.full_cert_path}')`;
-    }
+    const bgSrc = cert.thumb_path || cert.full_cert_path;
+    if (bgSrc) bg.dataset.bg = bgSrc;
 
     const overlay = document.createElement('div');
     overlay.className = 'cert-card__overlay';
@@ -164,6 +194,7 @@ function buildCertCards() {
 
     card.append(bg, overlay, scan, logoWrap, titleDiv, indexDiv);
     row.appendChild(card);
+    observeCardBg(card, bg);
 
     card.addEventListener('click', () => selectCertificate(i));
     card.addEventListener('keydown', (e) => {
