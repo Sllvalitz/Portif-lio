@@ -19,6 +19,12 @@
   align-items: center;
 }
 
+/* Cabeçalho da seção: ocupa a linha de cima (as duas colunas); o gap do grid dá o respiro */
+.projects__main > .section-header {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
 /* ---- FEATURED IMAGE ---- */
 #featured-project-image {
   width: 100%;
@@ -893,4 +899,409 @@
 .project-overview,
 .project-guide {
   transition: opacity var(--dur-carousel) var(--ease-out-expo);
+}
+
+/* =============================================================
+   BARRA DE CONTROLES — abas Projetos/Artigos, contador e filtros
+   Só tokens do global.css. Os filhos diretos de .projects__main
+   ocupam a linha inteira do grid (as duas colunas).
+   ============================================================= */
+.browse-controls,
+.browse-empty,
+.browse-panel--articles {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* Painel de Projetos: display:contents mantém imagem + texto como filhos
+   diretos do grid (layout original intacto). */
+.browse-panel--projects { display: contents; }
+
+/* Painel inativo (outra aba / sem resultados) */
+.browse-panel.is-inactive { visibility: hidden; }
+
+/* Desktop: os dois painéis ocupam a MESMA área do grid (linha 3). Quem dá a altura
+   é o painel de Projetos, que nunca sai do layout — assim o cabeçalho e a barra de
+   controles não se mexem ao trocar de aba, nem com muitos artigos (a lista rola
+   dentro da área). No celular (mobile.css) o inativo some e o fluxo é normal. */
+@media (min-width: 901px) {
+  .browse-panel--projects > :nth-child(1) { grid-area: 3 / 1; }
+  .browse-panel--projects > :nth-child(2) { grid-area: 3 / 2; }
+
+  .browse-panel--articles {
+    grid-area: 3 / 1 / 4 / -1;
+    position: relative;
+    align-self: stretch;
+  }
+
+  .articles-list {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    padding: 3px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--white-a20) transparent;
+  }
+
+  .browse-empty {
+    grid-area: 3 / 1 / 4 / -1;
+    align-self: start;
+  }
+}
+
+.browse-controls {
+  margin-top: calc(-28 * var(--u)); /* aproxima do título; o gap do grid é 60u */
+  padding-bottom: calc(20 * var(--u));
+  border-bottom: 1px solid var(--white-a08);
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--u));
+}
+
+.browse-controls[hidden] { display: none; }
+
+.browse-controls__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+}
+
+/* A dica do cabeçalho some na aba Artigos sem mudar a altura do cabeçalho */
+.section-header__hint.is-off { visibility: hidden; }
+
+/* ---- ABAS ---- */
+.browse-tabs {
+  display: flex;
+  gap: calc(8 * var(--u));
+}
+
+.browse-tab {
+  background: var(--surface-1);
+  border: 1px solid var(--white-a12);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: calc(10 * var(--u)) calc(22 * var(--u));
+  border-radius: calc(8 * var(--u));
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.browse-tab:hover {
+  color: var(--text-soft);
+  border-color: var(--white-a30);
+}
+
+.browse-tab.is-active {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: var(--black);
+  font-weight: 600;
+}
+
+.browse-tab:focus-visible,
+.browse-chip:focus-visible,
+.browse-more:focus-visible,
+.browse-empty__reset:focus-visible {
+  outline: 2px solid var(--text-heading);
+  outline-offset: 3px;
+}
+
+.browse-count {
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ---- CHIPS ----
+   Um só container: [categorias] | [Todas as tags] [palavras-chave] [+ Filtros].
+   O JS limita a 1 linha no desktop (3 no celular) movendo o excedente para o menu. */
+.browse-filters {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: calc(8 * var(--u));
+}
+
+.browse-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  width: 100%;
+  min-width: 0;
+}
+
+/* Barra vertical entre categorias e palavras-chave */
+.browse-sep {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 1px;
+  margin-inline: calc(4 * var(--u));
+  background: var(--white-a20);
+}
+
+.browse-chip,
+.browse-more {
+  flex: 0 0 auto;
+  max-width: 100%;
+  background: transparent;
+  border: 1px solid var(--white-a15);
+  color: var(--white-a60);
+  font-family: var(--mono);
+  font-size: max(9.5px, calc(10.5 * var(--u)));
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: calc(6 * var(--u)) calc(14 * var(--u));
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.browse-chip:hover,
+.browse-more:hover {
+  color: var(--white-a85);
+  border-color: var(--white-a35);
+}
+
+.browse-chip[aria-pressed="true"] {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+  background: var(--white-a06);
+}
+
+.browse-more {
+  border-style: dashed;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-soft);
+}
+
+.browse-more[aria-expanded="true"] {
+  color: var(--text-heading);
+  border-color: var(--white-a50);
+}
+
+.browse-more[hidden],
+.browse-chip[hidden] { display: none; }
+
+/* Menu com as tags que não couberam na linha (sobrepõe o conteúdo, não empurra) */
+.browse-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: min(calc(520 * var(--u)), 100%);
+  max-height: calc(240 * var(--u));
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+  padding: calc(14 * var(--u));
+  background: var(--surface-2);
+  border: 1px solid var(--white-a15);
+  border-radius: calc(10 * var(--u));
+  box-shadow: 0 calc(12 * var(--u)) calc(32 * var(--u)) var(--black-a60);
+  scrollbar-width: thin;
+}
+
+.browse-menu[hidden] { display: none; }
+.browse-menu .browse-chip { white-space: normal; overflow-wrap: anywhere; text-align: left; }
+
+/* ---- SEM RESULTADOS ---- */
+.browse-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(16 * var(--u));
+  padding: calc(28 * var(--u)) 0;
+}
+
+.browse-empty[hidden] { display: none; }
+
+.browse-empty__text {
+  font-family: var(--mono);
+  font-size: max(10.5px, calc(12 * var(--u)));
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.browse-empty__reset {
+  background: transparent;
+  border: 1px solid var(--white-a25);
+  color: var(--white);
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: calc(8 * var(--u)) calc(16 * var(--u));
+  border-radius: calc(6 * var(--u));
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.browse-empty__reset:hover {
+  background: var(--white-a06);
+  border-color: var(--white-a50);
+}
+
+/* =============================================================
+   ABA ARTIGOS — listagem
+   ============================================================= */
+.articles-list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--u));
+}
+
+.article-card {
+  position: relative; /* o link do título cobre o card inteiro */
+  background: var(--surface-1);
+  border: 1px solid var(--white-a08);
+  border-radius: calc(10 * var(--u));
+  padding: calc(28 * var(--u)) calc(32 * var(--u));
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.article-card:hover {
+  border-color: var(--white-a25);
+  background: var(--surface-2);
+}
+
+/* 1ª linha do card: autores à esquerda, tipo da produção à direita */
+.article-card__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(6 * var(--u)) calc(16 * var(--u));
+  margin-bottom: calc(14 * var(--u));
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.article-card__authors {
+  min-width: 0;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.article-card__type {
+  margin-left: auto; /* fica à direita mesmo sem autores */
+  color: var(--text-soft);
+  text-align: right;
+}
+
+/* Metadados compactos (instituição, orientador…) — só os que existirem */
+.article-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(6 * var(--u)) calc(20 * var(--u));
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.article-card__meta { margin-bottom: calc(18 * var(--u)); }
+
+/* Indicador de link externo (↗) e aviso de conteúdo indisponível */
+.article-card__ext { color: var(--accent-green); }
+
+.article-card__status {
+  color: var(--text-muted);
+  font-style: italic;
+  letter-spacing: 0.08em;
+}
+
+.article-card__meta-item {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.article-card__meta-label {
+  margin-right: calc(8 * var(--u));
+  color: var(--white-a40);
+}
+
+.article-badge {
+  border: 1px dashed var(--white-a30);
+  border-radius: calc(3 * var(--u));
+  padding: calc(2 * var(--u)) calc(8 * var(--u));
+  color: var(--text-soft);
+}
+
+.article-card__title {
+  font-family: var(--body);
+  font-size: max(20px, calc(28 * var(--u)));
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: calc(12 * var(--u));
+}
+
+.article-card__title { color: var(--text-heading); }
+
+.article-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.article-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.article-card__link:focus-visible { outline: none; }
+.article-card__link:focus-visible::after {
+  outline: 2px solid var(--text-heading);
+  outline-offset: 3px;
+}
+
+.article-card__summary {
+  max-width: 72ch;
+  font-size: max(11.7px, calc(13 * var(--u)));
+  line-height: 1.8;
+  color: var(--text-muted);
+  margin-bottom: calc(18 * var(--u));
+  /* resumo breve: no máximo 4 linhas */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-card .project__tags { margin-bottom: 0; }
+
+/* entrada suave da listagem (o bloco global de reduced-motion zera a duração) */
+@keyframes browse-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.browse-panel--articles:not(.is-inactive) .articles-list {
+  animation: browse-in 0.35s var(--ease-out-expo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browse-tab,
+  .browse-chip,
+  .browse-more,
+  .article-card { transition: none; }
 }

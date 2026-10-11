@@ -3,18 +3,24 @@
    Portfolio: Anderson da Silva
    ============================================================= */
 
+/* Altura = conteúdo (sem o "vazio" de 100vh). Ao abrir um certificado o
+   painel entra no fluxo e a seção cresce junto. */
 #certs {
   background: transparent; /* herda o preto do body */
-  min-height: 100vh;
+  min-height: 0;
   scroll-snap-align: none;
   position: relative;
   overflow: visible;
   display: flex;
-  align-items: center;
-  padding: calc(120 * var(--u)) 0 calc(60 * var(--u));
+  padding: calc(120 * var(--u)) 0 calc(80 * var(--u)); /* 80 embaixo: respiro até o footer (com o painel aberto também) */
 }
 
 /* Largura vem de .container (global.css): 1280 * u, centralizado */
+
+/* ---- CABEÇALHO DA SEÇÃO (.section-header: global.css) ---- */
+#certs .section-header {
+  margin-inline: calc(8 * var(--u)); /* alinha com a borda do 1º card */
+}
 
 /* ---- GALERIA HORIZONTAL ---- */
 .certs__row {
@@ -66,8 +72,8 @@
   inset: 0;
   background-size: cover;
   background-position: center;
-  opacity: 0.35;
-  filter: blur(6px);
+  opacity: 0.45;
+  filter: blur(4px);
   transform: scale(1.08); /* evita halo transparente nas bordas ao desfocar */
   transition: opacity 0.5s ease, filter 0.5s ease;
   z-index: 0;
@@ -161,8 +167,8 @@
   font-family: var(--mono);
   font-size: max(9px, calc(10 * var(--u)));
   letter-spacing: 0.12em;
-  color: var(--white-a30);
-  opacity: 0.5;
+  color: var(--white-a60);
+  opacity: 0.7;
   transition: opacity 0.3s;
 }
 
@@ -223,6 +229,10 @@
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
+.cert-panel[hidden] {
+  display: none;
+}
+
 .cert-panel.is-open {
   opacity: 1;
   transform: translateY(0);
@@ -239,12 +249,53 @@
 }
 
 .cert-panel__preview {
+  position: relative;
+  width: 100%;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
   background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: calc(320 * var(--u));
   padding: calc(28 * var(--u));
+}
+
+/* outline por dentro: o painel tem overflow:hidden e cortaria o de fora */
+.cert-panel__preview:focus-visible {
+  outline: 2px solid var(--text-heading);
+  outline-offset: -4px;
+}
+
+/* A moldura acompanha o tamanho da imagem: a dica fica SOBRE o certificado */
+.cert-panel__frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: calc(6 * var(--u));
+  overflow: hidden;
+}
+
+.cert-panel__zoom {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--black-a45);
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.2em;
+  color: var(--white);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cert-panel__preview:hover .cert-panel__zoom,
+.cert-panel__preview:focus-visible .cert-panel__zoom {
+  opacity: 1;
 }
 
 .cert-panel__preview-img {
@@ -336,9 +387,28 @@
   transition: background 0.2s, border-color 0.2s;
 }
 
+.cert-panel__cta:focus-visible {
+  outline: 2px solid var(--text-heading);
+  outline-offset: 2px;
+}
+
 .cert-panel__cta:hover {
   background: var(--white-a06);
   border-color: var(--white-a50);
+}
+
+/* Sem hover (toque): rótulo fixo no canto, no mesmo padrão do
+   "TOQUE PARA EXPLORAR" dos projetos */
+@media (hover: none) {
+  .cert-panel__zoom {
+    inset: auto calc(10 * var(--u)) calc(10 * var(--u)) auto;
+    padding: 6px 9px;
+    background: var(--black-a60);
+    border: 1px solid var(--white-a18);
+    border-radius: 4px;
+    color: var(--white-a80);
+    opacity: 1;
+  }
 }
 
 /* =============================================================
@@ -353,12 +423,15 @@
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.35s ease;
+  visibility: hidden; /* fechado: botões/links saem da ordem de Tab */
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
 }
 
 .pdf-viewer.open {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity 0.35s ease, visibility 0s;
 }
 
 .pdf-viewer__backdrop {
@@ -379,14 +452,23 @@
   box-shadow: 0 calc(24 * var(--u)) calc(64 * var(--u)) var(--black-a55);
   overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   transform: scale(0.97);
   transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .pdf-viewer.open .pdf-viewer__box {
   transform: scale(1);
+}
+
+.pdf-viewer__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(10px, calc(20 * var(--u)));
 }
 
 .pdf-viewer__img {
@@ -396,6 +478,69 @@
   height: auto;
   object-fit: contain;
   display: block;
+  transition: opacity 0.25s ease;
+}
+
+.pdf-viewer__stage.is-loading .pdf-viewer__img {
+  opacity: 0;
+}
+
+.pdf-viewer__loader {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  animation: pdf-viewer-pulse 1.2s ease-in-out infinite;
+}
+
+.pdf-viewer__stage.is-loading .pdf-viewer__loader {
+  display: flex;
+}
+
+@keyframes pdf-viewer-pulse {
+  50% { opacity: 0.4; }
+}
+
+/* Setas sobrepostas às laterais da imagem */
+.pdf-viewer__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max(36px, calc(44 * var(--u)));
+  height: max(36px, calc(44 * var(--u)));
+  background: var(--black-a55);
+  border: 1px solid var(--white-a25);
+  border-radius: 50%;
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.pdf-viewer__nav svg {
+  width: 45%;
+  height: 45%;
+}
+
+.pdf-viewer__nav--prev { left: max(8px, calc(14 * var(--u))); }
+.pdf-viewer__nav--next { right: max(8px, calc(14 * var(--u))); }
+
+.pdf-viewer__nav:hover {
+  background: var(--black-a70);
+  border-color: var(--white-a50);
+}
+
+.pdf-viewer__nav[hidden] {
+  display: none;
 }
 
 .pdf-viewer__empty {
@@ -413,21 +558,56 @@
   color: var(--white-a35);
 }
 
+/* Barra superior: título · contador · Baixar PDF · fechar */
+.pdf-viewer__bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: max(10px, calc(14 * var(--u)));
+  padding: max(10px, calc(12 * var(--u))) max(12px, calc(18 * var(--u)));
+  border-bottom: 1px solid var(--white-a08);
+}
+
+.pdf-viewer__title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: max(9.9px, calc(11 * var(--u)));
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdf-viewer__counter {
+  flex: none;
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+
 .pdf-viewer__close {
-  position: absolute;
-  top: calc(16 * var(--u)); right: calc(16 * var(--u));
-  z-index: 10;
-  background: var(--black-a50);
-  border: 1px solid var(--white-a25);
-  color: var(--white);
-  width: calc(38 * var(--u)); height: calc(38 * var(--u));
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: max(14.4px, calc(16 * var(--u)));
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: max(34px, calc(38 * var(--u)));
+  height: max(34px, calc(38 * var(--u)));
+  background: var(--black-a50);
+  border: 1px solid var(--white-a25);
+  color: var(--white);
+  border-radius: 50%;
+  cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
+}
+
+.pdf-viewer__close svg {
+  width: 40%;
+  height: 40%;
 }
 
 .pdf-viewer__close:hover {
@@ -437,13 +617,11 @@
 
 /* Botão discreto "Baixar PDF" (solução híbrida) */
 .pdf-viewer__download {
-  position: absolute;
-  bottom: calc(16 * var(--u)); right: calc(16 * var(--u));
-  z-index: 10;
+  flex: none;
   display: flex;
   align-items: center;
   gap: calc(8 * var(--u));
-  background: var(--black-a55);
+  background: transparent;
   border: 1px solid var(--white-a20);
   color: var(--white-a80);
   font-family: var(--mono);
@@ -451,6 +629,7 @@
   letter-spacing: 0.15em;
   text-transform: uppercase;
   text-decoration: none;
+  white-space: nowrap;
   padding: calc(10 * var(--u)) calc(16 * var(--u));
   border-radius: calc(6 * var(--u));
   transition: background 0.2s, border-color 0.2s, color 0.2s;
@@ -460,6 +639,13 @@
   background: var(--white-a08);
   border-color: var(--white-a45);
   color: var(--white);
+}
+
+.pdf-viewer__close:focus-visible,
+.pdf-viewer__download:focus-visible,
+.pdf-viewer__nav:focus-visible {
+  outline: 2px solid var(--text-heading);
+  outline-offset: 2px;
 }
 
 .pdf-viewer__download[hidden] {

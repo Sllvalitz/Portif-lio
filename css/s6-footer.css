@@ -9,7 +9,7 @@
            .site-footer__cta      → título, subtítulo, e-mail + caret
            .site-footer__social   → redes sociais
          p.site-footer__rule      → divisória tracejada
-         .site-footer__meta       → localização · última atualização · ©
+         .site-footer__meta       → © (copyright)
    ============================================================= */
 
 /* O footer NÃO é <section>: não herda height:100vh nem scroll-snap
@@ -112,6 +112,86 @@
   50% { opacity: 0; }
 }
 
+/* ---- BOTÃO DE COPIAR E-MAIL (js/copy-email.js) ----
+   O feedback visual é o ícone virar "check" + um aviso curto acima do botão;
+   leitores de tela recebem o texto pela região .sr-only (role="status"). */
+.site-footer__copy-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.site-footer__copy {
+  width: max(28px, calc(30 * var(--u)));
+  height: max(28px, calc(30 * var(--u)));
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--white-a18);
+  border-radius: calc(6 * var(--u));
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.25s, color 0.2s;
+}
+
+.site-footer__copy:hover {
+  background: var(--white-a07);
+  border-color: var(--white-a50);
+}
+
+.site-footer__copy:focus-visible {
+  outline: 2px solid var(--text-heading);
+  outline-offset: 3px;
+}
+
+.site-footer__copy-icon {
+  width: max(14px, calc(15 * var(--u)));
+  height: max(14px, calc(15 * var(--u)));
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.site-footer__copy:hover .site-footer__copy-icon { opacity: 1; }
+
+.site-footer__copy-icon--done { display: none; }
+
+.site-footer__copy-wrap.is-copied .site-footer__copy {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.site-footer__copy-wrap.is-copied .site-footer__copy-icon--copy { display: none; }
+.site-footer__copy-wrap.is-copied .site-footer__copy-icon--done { display: block; opacity: 1; }
+
+.site-footer__copy-tip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  padding: calc(4 * var(--u)) calc(8 * var(--u));
+  background: var(--surface-2);
+  border: 1px solid var(--white-a18);
+  border-radius: calc(4 * var(--u));
+  font-size: max(9.9px, calc(10.5 * var(--u)));
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  color: var(--accent-green);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.site-footer__copy-wrap.is-copied .site-footer__copy-tip,
+.site-footer__copy-wrap.is-error .site-footer__copy-tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.site-footer__copy-wrap.is-error .site-footer__copy-tip { color: var(--text-soft); }
+
 /* ---- REDES SOCIAIS ---- */
 .site-footer__social {
   text-align: right;
@@ -176,7 +256,7 @@
   );
 }
 
-/* ---- METADADOS (3 itens) ---- */
+/* ---- METADADOS (só o copyright) ---- */
 .site-footer__meta {
   display: flex;
   align-items: center;
@@ -195,4 +275,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .site-footer__caret { animation: none; }
+  .site-footer__copy,
+  .site-footer__copy-icon,
+  .site-footer__copy-tip { transition: none; }
 }

@@ -193,6 +193,15 @@ body.nav-ready .site-header {
   opacity: 1;
 }
 
+/* Chegada pela logo (logo-reload.js): o header já aparece pronto, sem o fade de
+   entrada. "skip-loading" vale até o DOMContentLoaded; depois o loading.js
+   troca por "from-logo". */
+.skip-loading .site-header,
+.from-logo .site-header {
+  opacity: 1;
+  transition: none;
+}
+
 .site-header__logo {
   position: absolute;
   top: calc(42 * var(--u));
@@ -373,6 +382,60 @@ body.nav-ready .site-header {
   }
 }
 
+/* ---- BOTÃO DE CURRÍCULO (header) ----
+   Ação principal do header: fundo verde cheio, na mesma altura da logo e
+   espelhando-a no canto direito. No celular (mobile.css) vira um botão só
+   com ícone, ao lado das redes e do menu. Arquivo: /resume.pdf. */
+.site-header__cv {
+  position: absolute;
+  top: calc(42 * var(--u));
+  right: calc(100 * var(--u));
+  height: max(36px, calc(46 * var(--u)));
+  padding: 0 calc(20 * var(--u));
+
+  display: inline-flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+
+  background: var(--accent-green);
+  border: 1px solid var(--accent-green);
+  border-radius: calc(4 * var(--u));
+  color: var(--black);
+
+  font-family: var(--mono);
+  font-size: max(10.1px, calc(11.2 * var(--u)));
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+
+  pointer-events: auto;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.site-header__cv:hover {
+  background: var(--text-heading);
+  border-color: var(--text-heading);
+  transform: translateY(-1px);
+}
+
+.site-header__cv:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+
+.site-header__cv svg {
+  width: max(13px, calc(15 * var(--u)));
+  height: max(13px, calc(15 * var(--u)));
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header__cv { transition: none; }
+  .site-header__cv:hover { transform: none; }
+}
+
 /* ---- SECTION INDICATOR ----
    Indicador único e fixo (substitui os antigos v-labels estáticos por
    seção). O texto é trocado via JS (section-indicator.js) conforme a
@@ -419,6 +482,57 @@ body.nav-ready .site-header {
 .section-indicator.is-changing .section-indicator__text {
   opacity: 0;
   transform: translateY(6px);
+}
+
+/* ---- CABEÇALHO DE SEÇÃO (Sobre mim · Projetos · Certificados) ---- */
+.section-header {
+  margin-bottom: calc(36 * var(--u));
+}
+
+.section-header__eyebrow {
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: calc(10 * var(--u));
+}
+
+.section-header__title {
+  font-family: var(--display);
+  font-size: max(30px, calc(44 * var(--u)));
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--text-heading);
+  margin-bottom: calc(10 * var(--u));
+}
+
+.section-header__meta {
+  font-family: var(--mono);
+  font-size: max(10px, calc(12 * var(--u)));
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.section-header__hint {
+  margin-top: calc(14 * var(--u));
+  font-family: var(--mono);
+  font-size: max(9px, calc(10 * var(--u)));
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+}
+
+.section-header__hint span {
+  color: var(--accent-green);
+}
+
+.section-header__hint.is-done {
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* ---- SCROLL REVEAL — entrada das seções + stagger ---- */

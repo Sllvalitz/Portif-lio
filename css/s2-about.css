@@ -25,16 +25,25 @@
   align-items: center;
 }
 
+/* Cabeçalho da seção: linha de cima, nas duas colunas (como em Projetos) */
+.about__container > .section-header {
+  grid-column: 1 / -1;
+  margin-bottom: 0; /* o gap do grid dá o respiro */
+}
+
 /* ---- LEFT COLUMN ----
-   Linha do tempo vertical (mais recente no topo) + foto lado a lado. */
+   Só a foto, centralizada na coluna. Largura base de 360u (era 430u):
+   com o cabeçalho na linha de cima (~95u + 48u de gap), 360u × 612u
+   (proporção 1 / 1.7) é o que ainda cabe nos 760u úteis da seção em
+   1920×960, sem ela crescer além de 100vh. */
 .about__left-col {
   display: flex;
   align-items: stretch;
-  gap: calc(24 * var(--u));
+  justify-content: center;
 }
 
 .about__photo {
-  flex: 1;
+  flex: 0 1 calc(360 * var(--u));
   width: auto;
   max-width: calc(480 * var(--u));
   aspect-ratio: 1 / 1.7;
@@ -60,151 +69,6 @@
   font-size: max(9px, calc(10 * var(--u)));
   color: var(--white-a15);
   letter-spacing: 0.2em;
-}
-
-/* ---- LINHA DO TEMPO VERTICAL ----
-   Ano à esquerda, linha/pontos à direita (colados na foto) — deixa
-   o bloco mais leve visualmente e dá mais respiro para a foto. */
-.timeline-v {
-  position: relative;
-  width: calc(100 * var(--u));
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: calc(22 * var(--u)) 0 calc(6 * var(--u));
-}
-
-/* Seta no topo indicando a direção de avanço da linha do tempo */
-.timeline-v__arrow {
-  position: absolute;
-  top: 0;
-  right: calc(4 * var(--u));
-  transform: translateX(50%);
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 8px solid var(--white);
-  opacity: 0.6;
-}
-
-.timeline-v__line {
-  position: absolute;
-  top: calc(16 * var(--u));
-  bottom: 0;
-  right: calc(4 * var(--u));
-  width: 1px;
-  background: var(--white);
-  opacity: 0.35;
-}
-
-.timeline-v__point {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: calc(10 * var(--u));
-  cursor: pointer;
-
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo);
-}
-
-.timeline-v__point.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.timeline-v__dot {
-  width: calc(9 * var(--u));
-  height: calc(9 * var(--u));
-  border-radius: 50%;
-  background: var(--white);
-  flex-shrink: 0;
-  z-index: 2;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.timeline-v__point:hover .timeline-v__dot {
-  transform: scale(1.4);
-  box-shadow: 0 0 0 calc(6 * var(--u)) var(--white-a12);
-}
-
-/* Pulso de descoberta — dispara 1x via JS (timeline-affordance.js)
-   quando a seção entra na viewport pela primeira vez. Roda só
-   2 vezes e para; não é uma animação decorativa permanente. */
-@keyframes timeline-discover-pulse {
-  0%   { transform: scale(1);   box-shadow: 0 0 0 0 var(--white-a40); }
-  40%  { transform: scale(1.5); box-shadow: 0 0 0 calc(8 * var(--u)) var(--white-a00); }
-  100% { transform: scale(1);   box-shadow: 0 0 0 0 var(--white-a00); }
-}
-
-.timeline-v__dot.discover-pulse {
-  animation: timeline-discover-pulse 1.1s ease-out 2;
-}
-
-/* Dica temporária "↳ HOVER NOS MARCADORES" — some sozinha após alguns segundos */
-.timeline-v__hint {
-  position: absolute;
-  top: calc(-24 * var(--u));
-  right: calc(4 * var(--u));
-  font-family: var(--mono);
-  font-size: max(9px, calc(10 * var(--u)));
-  letter-spacing: 0.08em;
-  color: var(--white-a40);
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
-}
-
-.timeline-v__hint.is-visible {
-  opacity: 1;
-}
-
-.timeline-v__year {
-  font-family: var(--mono);
-  font-size: max(9.9px, calc(11 * var(--u)));
-  font-weight: 600;
-  color: var(--white);
-  white-space: nowrap;
-}
-
-.timeline-v__card {
-  position: absolute;
-  right: 100%;
-  top: 50%;
-  transform: translateY(-50%) translateX(6px);
-  margin-right: calc(14 * var(--u));
-  background: var(--surface-2);
-  border: 1px solid var(--white-a15);
-  padding: calc(12 * var(--u)) calc(16 * var(--u));
-  width: calc(220 * var(--u));
-  font-size: max(9.9px, calc(11 * var(--u)));
-  line-height: 1.5;
-  color: var(--text-muted);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  z-index: 30;
-  white-space: normal;
-}
-
-.timeline-v__point:hover .timeline-v__card,
-.timeline-v__point:focus-visible .timeline-v__card {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
-}
-
-.timeline-v__point:focus-visible {
-  outline: none; /* o destaque é o dot ampliado + o card aberto */
-}
-
-.timeline-v__point:focus-visible .timeline-v__dot {
-  transform: scale(1.4);
-  box-shadow: 0 0 0 calc(6 * var(--u)) var(--white-a12);
 }
 
 /* ---- RIGHT COLUMN ---- */
@@ -253,7 +117,7 @@
   white-space: normal;
 }
 
-/* Token "errado" — aparece, recebe um risco vermelho, depois some */
+/* Token "errado" — aparece, recebe um risco verde, depois some */
 .bio-stream__wrong {
   position: relative;
   display: inline-block;

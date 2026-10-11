@@ -54,7 +54,7 @@ main{display:contents}
 <noscript><style>
   #loading-screen { display: none; }
   .site-header { opacity: 1; }
-  [data-reveal], .timeline-v__point { opacity: 1; transform: none; }
+  [data-reveal] { opacity: 1; transform: none; }
 </style></noscript>
 
 <!-- Se a página foi recarregada pela logo, esconde o loading antes do 1º paint -->
@@ -62,16 +62,17 @@ main{display:contents}
 <script src="./js/loading.js" defer></script>
 <script src="./js/section-certificates.js" defer></script>
 <script src="./js/section-indicator.js" defer></script>
-<script src="./js/timeline-affordance.js" defer></script>
 <script src="./js/scroll-reveal.js" defer></script>
 <script src="./js/bio-stream.js" defer></script>
-<script src="./js/site-footer.js" defer></script>
 <script src="./js/hero-typing.js" defer></script>
 <script src="./js/stack-bars.js" defer></script>
+<script src="./js/articles.js" defer></script>
 <script src="./js/projects.js" defer></script>
 <script src="./js/tab-title.js" defer></script>
 <script src="./js/logo-reload.js" defer></script>
 <script src="./js/mobile-menu.js" defer></script>
+<script src="./js/copy-email.js" defer></script>
+<script src="./js/nav-scroll.js" defer></script>
 </head>
 
 <body>
@@ -95,6 +96,13 @@ main{display:contents}
 
       <text x="60" y="108" class="site-header__logo-labs" text-anchor="middle">LABS</text>
     </svg>
+  </a>
+
+  <!-- Botão de currículo em destaque. Desktop: canto direito, com texto.
+       Celular: vira botão só com ícone, ao lado das ações. Arquivo: /resume.pdf (raiz do site). -->
+  <a class="site-header__cv" href="./resume.pdf" download aria-label="Baixar currículo (PDF)" title="Baixar currículo (PDF)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg>
+    <span class="site-header__cv-label">Currículo</span>
   </a>
 
   <!-- SÓ MOBILE (oculto no desktop via CSS): redes + botão do menu -->
@@ -181,50 +189,13 @@ main{display:contents}
 <section id="about">
 
   <div class="about__container container">
+    <header class="section-header" data-reveal>
+      <p class="section-header__eyebrow">// Quem sou eu</p>
+      <h2 class="section-header__title">Sobre mim</h2>
+      <p class="section-header__meta">Ciência e Tecnologia · UFMA</p>
+    </header>
+
     <div class="about__left-col" data-reveal>
-      <!-- Linha do tempo vertical — data mais recente no topo -->
-      <div class="timeline-v" id="timeline-v">
-        <div class="timeline-v__arrow"></div>
-        <div class="timeline-v__line"></div>
-        <span class="timeline-v__hint" id="timeline-hint">↳ HOVER NOS MARCADORES</span>
-
-        <div class="timeline-v__point" tabindex="0">
-          <span class="timeline-v__year">2026</span>
-          <span class="timeline-v__dot"></span>
-          <div class="timeline-v__card">Participação no Programa Nacional de Aprendizado Acelerado (Sistemas Embarcados e Edge AI).</div>
-        </div>
-
-        <div class="timeline-v__point" tabindex="0">
-          <span class="timeline-v__year">2026</span>
-          <span class="timeline-v__dot"></span>
-          <div class="timeline-v__card">Idealizador e Líder no Projeto Ager (Agência Marandu).</div>
-        </div>
-
-        <div class="timeline-v__point" tabindex="0">
-          <span class="timeline-v__year">2025</span>
-          <span class="timeline-v__dot"></span>
-          <div class="timeline-v__card">Ingresso na UFMA — Bacharelado em Ciência e Tecnologia.</div>
-        </div>
-
-        <div class="timeline-v__point" tabindex="0">
-          <span class="timeline-v__year">2025</span>
-          <span class="timeline-v__dot"></span>
-          <div class="timeline-v__card">3° Lugar no Hackathon SESI e idealização da Protec — monitoramento de sinais vitais industriais.</div>
-        </div>
-
-        <div class="timeline-v__point" tabindex="0">
-          <span class="timeline-v__year">2025</span>
-          <span class="timeline-v__dot"></span>
-          <div class="timeline-v__card">Bolsista Back-end no Trilhas Inova 2B e líder de equipes multidisciplinares.</div>
-        </div>
-
-        <div class="timeline-v__point" tabindex="0">
-          <span class="timeline-v__year">2021</span>
-          <span class="timeline-v__dot"></span>
-          <div class="timeline-v__card">Ingresso no Espaço Maker do CMT I — início da trajetória em robótica escolar.</div>
-        </div>
-      </div>
-
       <div class="about__photo">
         <!-- Replace src with your actual photo -->
         <div class="about__photo-placeholder">[ FOTO ]</div>
@@ -236,7 +207,7 @@ main{display:contents}
     <div class="about__right-col">
       <div class="about__bio-title" data-reveal>Acadêmico em Ciência e Tecnologia</div>
       <p class="about__bio-text" data-reveal data-reveal-delay="90">
-        Desenvolvedor na interseção entre hardware e software, com foco em sistemas embarcados, Edge AI e IoT. Desenvolvo firmware em C/C++ e Python para microcontroladores como o ESP32, integrando sensores, comunicação e processamento de dados na borda. Também trabalho com visão computacional e infraestrutura Linux/Docker, do protótipo eletrônico ao serviço em execução. Tenho base prática em robótica e eletrônica e busco aplicar IA a sistemas robóticos autônomos, em projetos de P&D que unam sistemas de baixo nível e inteligência embarcada.
+        Desenvolvedor entusiasta de sistemas embarcados, Edge AI e IoT, com atuação em projetos que envolvem treinamento de modelos de IA e criação de firmware. Desenvolvo projetos utilizando C/C++ e Python em microcontroladores como o ESP32, explorando integração de sensores, comunicação sem fio e processamento de dados na borda, onde minha experiência prática em eletrônica e robótica são o diferencial. Também busco expandir meus conhecimentos em visão computacional, infraestrutura Linux/Docker e iniciativas de PD&I. 
       </p>
 
       <div class="about__education" data-reveal data-reveal-delay="180">
@@ -248,14 +219,6 @@ main{display:contents}
               <div class="about__edu-year">2025 - Presente</div>
               <div class="about__edu-inst">UNIVERSIDADE FEDERAL DO MARANHÃO</div>
               <div class="about__edu-course">Ciência e Tecnologia</div>
-            </div>
-          </div>
-          <div class="about__edu-item">
-            <div class="about__edu-dot"></div>
-            <div>
-              <div class="about__edu-year">2022 - 2025</div>
-              <div class="about__edu-inst">COLÉGIO MILITAR TIRADENTES - I</div>
-              <div class="about__edu-course">Ensino Médio | Robótica Escolar</div>
             </div>
           </div>
         </div>
@@ -280,6 +243,36 @@ main{display:contents}
 <section id="projects">
 
   <div class="projects__main container" data-reveal>
+    <header class="section-header">
+      <p class="section-header__eyebrow">// Trabalhos</p>
+      <h2 class="section-header__title">Projetos</h2>
+      <p class="section-header__hint"><span aria-hidden="true">›</span> Clique na imagem para explorar o projeto</p>
+    </header>
+
+    <!-- Barra de controles: abas (Projetos/Artigos), contador e filtros por tag.
+         Os chips são montados em projects.js a partir das tags dos dados. -->
+    <div class="browse-controls" id="browse-controls">
+      <div class="browse-controls__row">
+        <div class="browse-tabs" role="tablist" aria-label="Tipo de conteúdo">
+          <button class="browse-tab is-active" id="browse-tab-projects" type="button" role="tab"
+                  data-tab="projects" aria-selected="true" aria-controls="browse-panel-projects">Projetos</button>
+          <button class="browse-tab" id="browse-tab-articles" type="button" role="tab"
+                  data-tab="articles" aria-selected="false" aria-controls="browse-panel-articles" tabindex="-1">Artigos</button>
+        </div>
+        <p class="browse-count" id="browse-count" role="status" aria-live="polite"></p>
+      </div>
+      <!-- Chips montados em projects.js (aba Artigos: [categorias] | [palavras-chave]). O botão "+ Filtros"
+           é reposicionado pelo JS no fim da linha de chips; o excedente vai para o menu. -->
+      <div class="browse-filters" id="browse-filters" role="group" aria-label="Filtrar por tags">
+        <div class="browse-chips" id="browse-chips"></div>
+        <button class="browse-more" id="browse-more" type="button" aria-expanded="false" aria-controls="browse-menu" hidden>+ Filtros</button>
+        <div class="browse-menu" id="browse-menu" role="group" aria-label="Mais tags" hidden></div>
+      </div>
+    </div>
+
+    <!-- ABA PROJETOS (conteúdo original; display:contents mantém as duas colunas do grid) -->
+    <div class="browse-panel browse-panel--projects" id="browse-panel-projects" role="tabpanel" aria-labelledby="browse-tab-projects">
+
     <!-- Featured Image -->
     <div>
       <div id="featured-project-image">
@@ -315,6 +308,20 @@ main{display:contents}
       </div>
       <div class="carousel__counter" id="carousel-counter">01 / 03</div>
     </div>
+
+    </div><!-- /ABA PROJETOS -->
+
+    <!-- ABA ARTIGOS: listagem (cards montados em projects.js a partir de js/articles.js) -->
+    <div class="browse-panel browse-panel--articles is-inactive" id="browse-panel-articles" role="tabpanel" aria-labelledby="browse-tab-articles" inert>
+      <div class="articles-list" id="articles-list"></div>
+    </div>
+
+    <!-- Sem resultados (vale para as duas abas) -->
+    <div class="browse-empty" id="browse-empty" hidden>
+      <p class="browse-empty__text">// nenhum resultado para esta combinação de tags</p>
+      <button class="browse-empty__reset" id="browse-empty-reset" type="button">Limpar filtros</button>
+    </div>
+
   </div>
 </section>
 
@@ -414,15 +421,26 @@ main{display:contents}
 <section id="certs">
 
   <div class="certs__container container">
+    <!-- Cabeçalho da seção — contagem e horas preenchidas via JS a partir do array CERTS -->
+    <header class="section-header" data-reveal>
+      <p class="section-header__eyebrow">// Capacitações e cursos</p>
+      <h2 class="section-header__title">Certificados</h2>
+      <p class="section-header__meta" id="certs-meta"></p>
+      <p class="section-header__hint" id="certs-hint"><span aria-hidden="true">›</span> Selecione um certificado para ver os detalhes</p>
+    </header>
+
     <!-- Cards row — gerado via JS a partir do array CERTS -->
     <div class="certs__row" id="certs-row"></div>
 
     <!-- Painel de detalhes — inline, abaixo da galeria (não é modal) -->
-    <div class="cert-panel" id="cert-panel" hidden>
-      <div class="cert-panel__preview">
-        <img class="cert-panel__preview-img" id="panel-preview-img" alt="" hidden>
-        <div class="cert-panel__preview-placeholder" id="panel-preview-placeholder">[ CERTIFICADO ]</div>
-      </div>
+    <div class="cert-panel" id="cert-panel" role="region" aria-label="Detalhes do certificado" hidden>
+      <button class="cert-panel__preview" id="panel-preview" type="button" aria-label="Ampliar certificado">
+        <span class="cert-panel__frame">
+          <img class="cert-panel__preview-img" id="panel-preview-img" alt="" hidden>
+          <span class="cert-panel__zoom" aria-hidden="true">AMPLIAR</span>
+        </span>
+        <span class="cert-panel__preview-placeholder" id="panel-preview-placeholder">[ CERTIFICADO ]</span>
+      </button>
       <div class="cert-panel__info">
         <p class="cert-panel__counter" id="panel-counter">01 / 05</p>
         <h3 class="cert-panel__title" id="panel-title">TÍTULO</h3>
@@ -476,6 +494,15 @@ main{display:contents}
           <span class="site-footer__email-line">
             <a href="mailto:anderson.avliss8@gmail.com" class="site-footer__email">anderson.avliss8@gmail.com</a>
             <span class="site-footer__caret" aria-hidden="true"></span>
+          </span>
+          <!-- Copiar e-mail (js/copy-email.js) -->
+          <span class="site-footer__copy-wrap" id="copy-email-wrap">
+            <button type="button" class="site-footer__copy" id="copy-email-btn" aria-label="Copiar e-mail" title="Copiar e-mail">
+              <svg class="site-footer__copy-icon site-footer__copy-icon--copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+              <svg class="site-footer__copy-icon site-footer__copy-icon--done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+            </button>
+            <span class="site-footer__copy-tip" id="copy-email-tip" aria-hidden="true"></span>
+            <span class="sr-only" id="copy-email-status" role="status" aria-live="polite"></span>
           </span>
         </div>
       </div>
@@ -541,6 +568,14 @@ main{display:contents}
       </a>
 
 
+      <!-- Lattes -->
+      <a href="https://lattes.cnpq.br/7164324309545441" target="_blank" rel="noopener noreferrer"
+         class="site-footer__social-btn" title="Currículo Lattes" aria-label="Currículo Lattes">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 1.8a8.2 8.2 0 110 16.4 8.2 8.2 0 010-16.4zM9.2 7h1.8v7.8h4.5v1.7H9.2z"/>
+        </svg>
+      </a>
+
         </div>
       </div>
 
@@ -549,8 +584,6 @@ main{display:contents}
     <p class="site-footer__rule" aria-hidden="true"></p>
 
     <div class="site-footer__meta">
-      <span class="site-footer__meta-item">São Luís UTC-3</span>
-      <span class="site-footer__meta-item" id="footer-updated-item" hidden>Última atualização: <time id="footer-updated"></time></span>
       <span class="site-footer__meta-item">&copy; 2026 Anderson da Silva</span>
     </div>
 

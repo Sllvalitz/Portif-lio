@@ -2,9 +2,10 @@
    LOGO RELOAD — logo-reload.js
    Clicar na logo do header:
      1. rola suavemente até o Hero (topo);
-     2. ao chegar, recarrega a página do zero, reiniciando todas as
-        animações — exceto a tela de loading, que só roda na primeira
-        entrada ou em um reload normal (F5).
+     2. ao chegar, recarrega a página do zero, reiniciando as animações
+        — exceto a tela de loading (que só roda na primeira entrada ou em
+        um reload normal, F5), o hero e o header, que já nascem prontos
+        (loading.js marca html.from-logo; ver hero-typing.js e global.css).
 
    Como o reload acontece já no topo, não há salto nem "descida
    automática" por restauração de scroll.

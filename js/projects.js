@@ -25,6 +25,44 @@ function loadMarked() {
   return markedPromise;
 }
 
+/* ---- Utilitários compartilhados pelos dois modais (projeto e artigo) ---- */
+let scrollLockY = 0;
+
+/* Trava o scroll da página sem perder a posição ao fechar.
+   overflow:hidden no <html> (em vez de body{position:fixed}) mantém o
+   scroll onde está — o body fixo zerava o scroll e o scrollTo de volta
+   rodava com scroll-behavior:smooth ("sobe e desce sozinho"). */
+function lockPageScrollForModal() {
+  scrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
+  document.documentElement.style.overflow = 'hidden';
+}
+
+function unlockPageScrollForModal() {
+  document.documentElement.style.overflow = '';
+  if (Math.abs((window.scrollY || 0) - scrollLockY) > 1) {
+    window.scrollTo({ top: scrollLockY, left: 0, behavior: 'instant' });
+  }
+}
+
+// Prende o foco (Tab / Shift+Tab) dentro de `box` enquanto o modal estiver aberto
+function trapTab(e, box) {
+  if (e.key !== 'Tab') return;
+  const focusable = Array.from(
+    box.querySelectorAll('button:not([hidden]), a[href]:not([hidden]), [tabindex]:not([tabindex="-1"]):not([hidden])')
+  ).filter((el) => !el.disabled && el.offsetParent !== null);
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
+}
+
 // ---- PROJECTS CAROUSEL ----
 const projects = [
 {
@@ -51,8 +89,10 @@ const projects = [
 }
 ];
 
-let currentProject = 0;
-let thumbWindowStart = 0;
+let currentProject = 0;                         // índice REAL em `projects` (o modal e as URLs usam o mesmo)
+let visible = projects.map((_, i) => i);        // índices reais que passam no filtro de tags
+let thumbWindowStart = 0;                       // posição dentro de `visible`
+let projectsViewActive = true;                  // false: aba Artigos aberta / leitura / sem resultados
 let progressTimer = null;
 let progressStart = null;
 const DURATION = 15000;
@@ -75,19 +115,21 @@ function getThumbWindowSize() {
 }
 
 function getVisibleThumbCount() {
-  return Math.min(getThumbWindowSize(), projects.length);
+  return Math.min(getThumbWindowSize(), visible.length);
 }
+
+const posOf = (idx) => visible.indexOf(idx);
 
 // Reposiciona a janela só o necessário para manter o projeto
 // selecionado visível — não move se ele já estiver dentro dela.
-function updateThumbWindow(selectedIdx) {
+function updateThumbWindow(selectedPos) {
   const visibleCount = getVisibleThumbCount();
-  const maxStart = Math.max(0, projects.length - visibleCount);
+  const maxStart = Math.max(0, visible.length - visibleCount);
 
-  if (selectedIdx < thumbWindowStart) {
-    thumbWindowStart = selectedIdx;
-  } else if (selectedIdx > thumbWindowStart + visibleCount - 1) {
-    thumbWindowStart = selectedIdx - visibleCount + 1;
+  if (selectedPos < thumbWindowStart) {
+    thumbWindowStart = selectedPos;
+  } else if (selectedPos > thumbWindowStart + visibleCount - 1) {
+    thumbWindowStart = selectedPos - visibleCount + 1;
   }
 
   thumbWindowStart = Math.min(Math.max(thumbWindowStart, 0), maxStart);
@@ -98,7 +140,7 @@ function buildThumbs() {
   const visibleCount = getVisibleThumbCount();
 
   for (let localIndex = 0; localIndex < visibleCount; localIndex++) {
-    const realIndex = thumbWindowStart + localIndex;
+    const realIndex = visible[thumbWindowStart + localIndex];
     const p = projects[realIndex];
     const t = document.createElement('div');
     t.className = 'carousel__thumb' + (realIndex === currentProject ? ' active' : '');
@@ -125,8 +167,9 @@ function updateCarouselNavState() {
   prevBtn.disabled = false;
   nextBtn.disabled = false;
   if (carouselCounterEl) {
-    carouselCounterEl.textContent =
-      String(currentProject + 1).padStart(2, '0') + ' / ' + String(projects.length).padStart(2, '0');
+    carouselCounterEl.textContent = visible.length
+      ? String(posOf(currentProject) + 1).padStart(2, '0') + ' / ' + String(visible.length).padStart(2, '0')
+      : '00 / 00';
   }
 }
 
@@ -139,7 +182,7 @@ function renderFeaturedImage(p) {
 function setProject(idx, animate = true) {
   currentProject = idx;
   const p = projects[idx];
-  updateThumbWindow(idx);
+  updateThumbWindow(Math.max(0, posOf(idx)));
 
   if (animate) {
     titleEl.style.opacity = '0';
@@ -196,7 +239,7 @@ function resetTimer() {
   progressStart = null;
   lastTickTs = null;
   progressFill.style.width = '0%';
-  if (reduceMotion) return; // sem auto-avanço: navegação só manual
+  if (reduceMotion || !projectsViewActive) return; // sem auto-avanço: navegação só manual / aba oculta
   function tick(ts) {
     if (!progressStart) progressStart = ts;
     // pausado: "congela" o tempo decorrido empurrando o início para frente
@@ -208,23 +251,60 @@ function resetTimer() {
     if (elapsed < DURATION) {
       progressTimer = requestAnimationFrame(tick);
     } else {
-      setProject((currentProject + 1) % projects.length);
+      stepProject(1);
     }
   }
   progressTimer = requestAnimationFrame(tick);
 }
 
-prevBtn.addEventListener('click', () => {
-  setProject((currentProject - 1 + projects.length) % projects.length);
-});
-nextBtn.addEventListener('click', () => {
-  setProject((currentProject + 1) % projects.length);
-});
+// Avança/recua dentro do conjunto filtrado (circular).
+function stepProject(delta) {
+  if (!visible.length) return;
+  const n = visible.length;
+  setProject(visible[(Math.max(0, posOf(currentProject)) + delta + n) % n]);
+}
+
+prevBtn.addEventListener('click', () => stepProject(-1));
+nextBtn.addEventListener('click', () => stepProject(1));
 
 window.addEventListener('resize', () => {
-  updateThumbWindow(currentProject);
+  updateThumbWindow(Math.max(0, posOf(currentProject)));
   buildThumbs();
 });
+
+/* ---- FILTRO POR TAGS (chamado pela barra de controles, mais abaixo) ----
+   Lógica OU: passa quem tiver ao menos uma das tags selecionadas. Se o projeto
+   atual sai do conjunto, o primeiro resultado válido é selecionado. Devolve a
+   quantidade de resultados. */
+function applyProjectFilter(selected) {
+  visible = projects.reduce((acc, p, i) => {
+    if (selected.size === 0 || p.tags.some((t) => selected.has(t))) acc.push(i);
+    return acc;
+  }, []);
+
+  if (visible.length === 0) {
+    buildThumbs();
+    updateCarouselNavState();
+  } else if (posOf(currentProject) < 0) {
+    setProject(visible[0]);
+  } else {
+    updateThumbWindow(posOf(currentProject));
+    buildThumbs();
+    updateCarouselNavState();
+  }
+  return visible.length;
+}
+
+// Pausa/retoma o auto-avanço quando a aba Projetos some/volta (Artigos, leitura, sem resultados).
+function setProjectsViewActive(active) {
+  if (projectsViewActive === active) return;
+  projectsViewActive = active;
+  if (!active) {
+    if (progressTimer) { cancelAnimationFrame(progressTimer); progressTimer = null; }
+  } else {
+    resetTimer();
+  }
+}
 
 setProject(0, false);
 
@@ -252,7 +332,6 @@ setProject(0, false);
   let guideRequestToken = 0;
   const guideHtmlCache = {}; // id -> html já renderizado (evita refetch)
   let lastFocusedEl = null;
-  let scrollLockY = 0;
   const TRANSITION_MS = 400; // deve bater com .project-modal (CSS)
   let hideTimer = null;
   let closing = false;
@@ -286,22 +365,6 @@ setProject(0, false);
   const overviewDescEl = document.getElementById('overview-desc');
   const guideContentEl = document.getElementById('guide-markdown-content');
   const guidePdfBtn = document.getElementById('guide-pdf-btn');
-
-  /* Trava o scroll da página sem perder a posição ao fechar.
-     overflow:hidden no <html> (em vez de body{position:fixed}) mantém o
-     scroll onde está — o body fixo zerava o scroll e o scrollTo de volta
-     rodava com scroll-behavior:smooth ("sobe e desce sozinho"). */
-  function lockPageScrollForModal() {
-    scrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
-    document.documentElement.style.overflow = 'hidden';
-  }
-
-  function unlockPageScrollForModal() {
-    document.documentElement.style.overflow = '';
-    if (Math.abs((window.scrollY || 0) - scrollLockY) > 1) {
-      window.scrollTo({ top: scrollLockY, left: 0, behavior: 'instant' });
-    }
-  }
 
   function updateNavState() {
     btnPrev.disabled = modalIndex === 0;
@@ -514,12 +577,6 @@ function renderDifficultyStars(difficulty) {
     }, 150);
   }
 
-  function getFocusableEls() {
-    return Array.from(
-      box.querySelectorAll('button:not([hidden]), a[href]:not([hidden]), [tabindex]:not([tabindex="-1"]):not([hidden])')
-    ).filter((el) => !el.disabled && el.offsetParent !== null);
-  }
-
   function handleModalKeydown(e) {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -529,21 +586,8 @@ function renderDifficultyStars(difficulty) {
     if (e.key === 'ArrowLeft') { navigateModal(-1); return; }
     if (e.key === 'ArrowRight') { navigateModal(1); return; }
 
-    if (e.key === 'Tab') {
-      // Prende o foco dentro do modal enquanto ele estiver aberto
-      const focusable = getFocusableEls();
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
 
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
+    trapTab(e, box); // prende o foco dentro do modal enquanto ele estiver aberto
   }
 
   // Abertura pelo usuário: mostra o modal e empilha /projetos/<id>.
@@ -665,4 +709,335 @@ function renderDifficultyStars(difficulty) {
   bindProjectModalTrigger(titleEl, 'Ver detalhes completos do projeto');
   bindProjectModalTrigger(featImg, 'Ver detalhes completos do projeto');
 })();
+// ---- BARRA DE CONTROLES (abas Projetos/Artigos + filtros por tag) E ARTIGOS ----
+// Reutiliza o array `projects` (via applyProjectFilter). As publicações vêm de
+// js/articles.js (dados separados) e sempre apontam para uma publicação EXTERNA.
+(function () {
+  const ARTICLES = window.PORTFOLIO_ARTICLES || [];
+
+  const section = document.getElementById('projects');
+  const controlsEl = document.getElementById('browse-controls');
+  const tabBtns = Array.from(controlsEl.querySelectorAll('[role="tab"]'));
+  const countEl = document.getElementById('browse-count');
+  const filtersEl = document.getElementById('browse-filters');
+  const chipsEl = document.getElementById('browse-chips');
+  const moreBtn = document.getElementById('browse-more');
+  const menuEl = document.getElementById('browse-menu');
+  const panels = {
+    projects: document.getElementById('browse-panel-projects'),
+    articles: document.getElementById('browse-panel-articles')
+  };
+  const listEl = document.getElementById('articles-list');
+  const emptyEl = document.getElementById('browse-empty');
+  const emptyResetBtn = document.getElementById('browse-empty-reset');
+  const hintEl = section.querySelector('.section-header__hint');
+
+  const state = {
+    tab: 'projects',
+    // tags (projetos) / palavras-chave (artigos); preservadas ao trocar de aba/abrir artigo
+    selected: { projects: new Set(), articles: new Set() },
+    category: null, // aba Artigos: seleção única (null = todas)
+    menuOpen: false
+  };
+
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const dataFor = (tab) => (tab === 'projects' ? projects : ARTICLES);
+  // projetos usam `tags`; publicações usam `keywords` (sistemas independentes)
+  const tagsOf = (tab, item) => (tab === 'projects' ? item.tags : item.keywords) || [];
+  const matchesTags = (tab, item, sel) => sel.size === 0 || tagsOf(tab, item).some((t) => sel.has(t)); // OU
+  const uniqueTags = (tab) => Array.from(new Set(dataFor(tab).flatMap((i) => tagsOf(tab, i))));
+
+  // Categorias derivadas de TODAS as publicações cadastradas (independe dos filtros ativos).
+  // Com menos de duas categorias o filtro de categorias (e a barra vertical) não aparece.
+  function availableCategories() {
+    const all = window.PORTFOLIO_PUBLICATION_CATEGORIES || [];
+    const present = all.filter((c) => ARTICLES.some((a) => a.category === c.id));
+    return present.length >= 2 ? present : [];
+  }
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  /* ---- LINK DA PUBLICAÇÃO ----
+     Todo card real aponta para a publicação original (`publicationUrl`: periódico,
+     repositório, anais...), aberta em nova aba. URL ausente/inválida → card sem link.
+     O artigo demonstrativo (`demo: true`) nunca vira link. */
+  function safeExternalUrl(u) {
+    if (typeof u !== 'string') return null;
+    try {
+      const x = new URL(u.trim());
+      return x.protocol === 'https:' || x.protocol === 'http:' ? x.href : null;
+    } catch (e) { return null; } // relativa, vazia ou inválida: não é uma URL externa real
+  }
+
+  const publicationLink = (a) => (a.demo ? null : safeExternalUrl(a.publicationUrl));
+
+  // ids de publicações devem ser únicos
+  (function warnDuplicateIds() {
+    const seen = new Set();
+    ARTICLES.forEach((a) => {
+      if (seen.has(a.id)) console.warn('[artigos] id duplicado:', a.id);
+      seen.add(a.id);
+    });
+  })();
+
+  /* ---- CHIPS ----
+     Aba Artigos:  [categorias] | [Todas as tags] [palavras-chave…] [+ FILTROS]
+     Aba Projetos: [Todas as tags] [tags…] [+ FILTROS]
+     Tudo no mesmo container flex. No desktop cabe em UMA linha; em telas pequenas
+     pode quebrar em até 3. O que não cabe nesse limite vai para o menu "+ Filtros". */
+  function buildChip(label, key, pressed, onClick, group) {
+    const b = el('button', 'browse-chip', label);
+    b.type = 'button';
+    b.dataset.key = key;
+    b.dataset.group = group; // 'cat' | 'all' | 'kw'
+    b.setAttribute('aria-pressed', String(pressed));
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  const toggleTag = (tag) => () => {
+    const sel = state.selected[state.tab];
+    if (sel.has(tag)) sel.delete(tag); else sel.add(tag);
+    update();
+  };
+
+  function applyMenuState() {
+    menuEl.hidden = !state.menuOpen || moreBtn.hidden;
+    moreBtn.setAttribute('aria-expanded', String(!menuEl.hidden));
+  }
+
+  function closeMenu(refocus) {
+    if (!state.menuOpen) return;
+    state.menuOpen = false;
+    applyMenuState();
+    if (refocus) moreBtn.focus();
+  }
+
+  const maxChipRows = () => (window.matchMedia('(max-width: 900px)').matches ? 3 : 1);
+
+  // Linhas ocupadas pelos elementos visíveis (agrupa por offsetTop, com tolerância)
+  function countRows(els) {
+    const tops = els.map((e) => e.offsetTop).sort((x, y) => x - y);
+    let rows = 0;
+    let last = -Infinity;
+    tops.forEach((t) => { if (t - last > 6) { rows++; last = t; } });
+    return rows;
+  }
+
+  // Esconde (do fim para o começo) as palavras-chave que passam do limite de linhas
+  // e as move para o menu "+ Filtros". Categorias e "Todas as tags" nunca saem da barra.
+  function layoutChips() {
+    const sel = state.selected[state.tab];
+    const kids = Array.from(chipsEl.children).filter((k) => k !== moreBtn);
+    const kw = kids.filter((k) => k.dataset.group === 'kw');
+    const visibleNow = () => Array.from(chipsEl.children).filter((k) => !k.hidden);
+    const limit = maxChipRows();
+
+    kids.forEach((k) => { k.hidden = false; });
+    moreBtn.hidden = true;
+
+    const overflow = [];
+    if (countRows(visibleNow()) > limit) {
+      moreBtn.hidden = false;
+      moreBtn.textContent = '+ Filtros · 9'; // rótulo mais largo possível, para medir
+      for (let i = kw.length - 1; i >= 0; i--) {
+        kw[i].hidden = true;
+        overflow.unshift(kw[i].dataset.key);
+        if (countRows(visibleNow()) <= limit) break;
+      }
+    }
+
+    menuEl.replaceChildren(...overflow.map((t) => buildChip(t, t, sel.has(t), toggleTag(t), 'kw')));
+    const hiddenActive = overflow.filter((t) => sel.has(t)).length;
+    moreBtn.textContent = '+ Filtros' + (hiddenActive ? ' · ' + hiddenActive : '');
+    moreBtn.hidden = overflow.length === 0;
+    if (moreBtn.hidden) state.menuOpen = false;
+    applyMenuState();
+  }
+
+  function renderChips() {
+    const tab = state.tab;
+    const sel = state.selected[tab];
+    const cats = tab === 'articles' ? availableCategories() : [];
+    if (state.category && !cats.some((c) => c.id === state.category)) state.category = null;
+
+    // o re-render troca os botões: devolve o foco ao mesmo chip (teclado)
+    const active = document.activeElement;
+    const focusKey = active === moreBtn ? '__more__'
+      : (chipsEl.contains(active) || menuEl.contains(active)) ? active.dataset.key : null;
+
+    const nodes = cats.map((c) => buildChip(c.label, 'cat:' + c.id, state.category === c.id, () => {
+      state.category = state.category === c.id ? null : c.id; // seleção única; clicar de novo desmarca
+      update();
+    }, 'cat'));
+    if (cats.length) {
+      const sep = el('span', 'browse-sep');
+      sep.setAttribute('role', 'separator');
+      sep.setAttribute('aria-orientation', 'vertical');
+      nodes.push(sep);
+    }
+    // "Todas as tags" limpa só as palavras-chave (a categoria é preservada)
+    nodes.push(buildChip('Todas as tags', '__all__', sel.size === 0, () => { sel.clear(); update(); }, 'all'));
+    uniqueTags(tab).forEach((t) => nodes.push(buildChip(t, t, sel.has(t), toggleTag(t), 'kw')));
+
+    chipsEl.replaceChildren(...nodes, moreBtn);
+    filtersEl.setAttribute('aria-label', cats.length ? 'Filtrar por categoria e palavras-chave' : 'Filtrar por tags');
+    layoutChips();
+
+    if (focusKey !== null) {
+      const pool = Array.from(chipsEl.children).filter((c) => !c.hidden && c.dataset.key).concat(Array.from(menuEl.children));
+      const target = focusKey === '__more__' ? (moreBtn.hidden ? null : moreBtn) : pool.find((c) => c.dataset.key === focusKey);
+      (target || (moreBtn.hidden ? chipsEl.querySelector('[data-key="__all__"]') : moreBtn)).focus({ preventScroll: true });
+    }
+  }
+
+  moreBtn.addEventListener('click', () => {
+    state.menuOpen = !state.menuOpen;
+    applyMenuState();
+  });
+
+  filtersEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state.menuOpen) { e.preventDefault(); closeMenu(true); }
+  });
+  filtersEl.addEventListener('focusout', (e) => {
+    if (e.relatedTarget && !filtersEl.contains(e.relatedTarget)) closeMenu(false);
+  });
+  // composedPath() vale mesmo quando o chip clicado já foi substituído pelo re-render
+  document.addEventListener('click', (e) => {
+    if (state.menuOpen && !e.composedPath().includes(filtersEl)) closeMenu(false);
+  });
+
+  if (window.ResizeObserver) new ResizeObserver(() => layoutChips()).observe(filtersEl);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutChips);
+
+  /* ---- ATUALIZAÇÃO GERAL (aba + filtros → painéis, contador, estado vazio) ----
+     Os painéis só ficam inativos (nunca somem do layout no desktop): o cabeçalho
+     e os controles não mudam de posição ao trocar de aba. */
+  function setPanelActive(panel, active) {
+    panel.classList.toggle('is-inactive', !active);
+    panel.toggleAttribute('inert', !active);
+  }
+
+  function update() {
+    const tab = state.tab;
+    const sel = state.selected[tab];
+    let count;
+
+    if (tab === 'projects') {
+      count = applyProjectFilter(sel);
+    } else {
+      const items = ARTICLES.filter((a) =>
+        (!state.category || a.category === state.category) && matchesTags('articles', a, sel)); // categoria E (kw OU kw)
+      renderArticleList(items);
+      count = items.length;
+    }
+
+    renderChips();
+    countEl.textContent = pad2(count) + (count === 1 ? ' resultado' : ' resultados');
+    setPanelActive(panels.projects, tab === 'projects' && count > 0);
+    setPanelActive(panels.articles, tab === 'articles' && count > 0);
+    emptyEl.hidden = count > 0;
+    if (hintEl) hintEl.classList.toggle('is-off', tab !== 'projects'); // visibility: não muda a altura do cabeçalho
+    setProjectsViewActive(tab === 'projects' && count > 0);
+  }
+
+  emptyResetBtn.addEventListener('click', () => {
+    state.selected[state.tab].clear();
+    if (state.tab === 'articles') state.category = null;
+    update();
+    chipsEl.firstElementChild.focus();
+  });
+
+  /* ---- ABAS ---- */
+  function switchTab(tab, focus) {
+    state.tab = tab;
+    closeMenu(false);
+    tabBtns.forEach((b) => {
+      const on = b.dataset.tab === tab;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    update();
+  }
+
+  tabBtns.forEach((b) => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+  controlsEl.querySelector('[role="tablist"]').addEventListener('keydown', (e) => {
+    const i = tabBtns.indexOf(document.activeElement);
+    if (i < 0) return;
+    let next = -1;
+    if (e.key === 'ArrowRight') next = (i + 1) % tabBtns.length;
+    else if (e.key === 'ArrowLeft') next = (i - 1 + tabBtns.length) % tabBtns.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = tabBtns.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    switchTab(tabBtns[next].dataset.tab, true);
+  });
+
+  /* ---- LISTAGEM DE ARTIGOS ---- */
+  function buildArticleCard(a) {
+    const card = el('article', 'article-card');
+
+    // 1ª linha: autores (esquerda) · tipo da produção (direita) — só o que existir
+    const top = el('div', 'article-card__top');
+    if (a.authors && a.authors.length) top.appendChild(el('p', 'article-card__authors', a.authors.join(', ')));
+    if (a.type) top.appendChild(el('p', 'article-card__type', a.type));
+    if (top.children.length) card.appendChild(top);
+
+    // Título: link para a publicação externa (nova aba) só quando há URL válida
+    const href = publicationLink(a);
+    const h = el('h3', 'article-card__title');
+    let link;
+    if (href) {
+      link = el('a', 'article-card__link', a.title);
+      link.href = href;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      const ext = el('span', 'article-card__ext', ' ↗'); // indicador visual (leitor de tela usa o texto abaixo)
+      ext.setAttribute('aria-hidden', 'true');
+      link.append(ext, el('span', 'sr-only', ' (abre a publicação em nova aba)'));
+    } else {
+      link = el('span', null, a.title); // sem URL válida: nunca vira link
+    }
+    h.appendChild(link);
+    card.appendChild(h);
+
+    if (a.summary) card.appendChild(el('p', 'article-card__summary', a.summary));
+
+    // Metadados compactos (sem rótulos vazios)
+    const meta = el('div', 'article-card__meta');
+    [['Instituição', a.institution], ['Orientador', a.advisor]].forEach(([label, value]) => {
+      if (!value) return;
+      const item = el('p', 'article-card__meta-item');
+      item.append(el('span', 'article-card__meta-label', label), document.createTextNode(value));
+      meta.appendChild(item);
+    });
+    if (a.demo) meta.appendChild(el('p', 'article-badge', 'Conteúdo fictício de desenvolvimento'));
+    else if (!href) meta.appendChild(el('p', 'article-card__status', 'Link da publicação ainda não disponível'));
+    if (meta.children.length) card.appendChild(meta);
+
+    // Palavras-chave
+    if (a.keywords && a.keywords.length) {
+      const kws = el('div', 'project__tags');
+      a.keywords.forEach((t) => kws.appendChild(el('span', 'project__tag', t)));
+      card.appendChild(kws);
+    }
+    return card;
+  }
+
+  function renderArticleList(items) {
+    listEl.replaceChildren(...items.map(buildArticleCard));
+  }
+
+  /* ---- INÍCIO ---- */
+  switchTab('projects');
+})();
+
 })();

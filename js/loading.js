@@ -141,11 +141,13 @@
     if (!screen) return;
 
     // Recarga disparada pela logo do header (logo-reload.js): o site
-    // reinicia do zero, mas sem repetir a tela de loading.
+    // reinicia do zero, mas sem repetir a tela de loading — e o hero e o
+    // header já nascem prontos ("from-logo": ver hero-typing.js e global.css).
     if (document.documentElement.classList.contains('skip-loading')) {
       try { sessionStorage.removeItem('skip-loading'); } catch (e) {}
       screen.remove();
       document.documentElement.classList.remove('skip-loading');
+      document.documentElement.classList.add('from-logo');
       revealSite();
       return;
     }

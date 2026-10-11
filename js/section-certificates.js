@@ -81,6 +81,20 @@ const CERTS = [
 
 let selectedIndex = null;
 let viewerEl = null;
+let viewerIndex = 0;
+let viewerOpener = null;
+
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, '0');
+const counter = (i) => `${pad(i + 1)} / ${pad(CERTS.length)}`;
+const plain = (cert) => cert.titulo.replace(/\s+/g, ' ').trim();
+const wrap = (i) => (i + CERTS.length) % CERTS.length;
+
+const ICON = {
+  prev:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+  next:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+};
 
 // Layout empilhado (celular/tablet em retrato): o painel de detalhes abre
 // logo abaixo do card clicado, dentro da lista. No desktop ele fica
@@ -93,19 +107,23 @@ const mqStacked = window.matchMedia('(max-width: 900px)');
 document.addEventListener('DOMContentLoaded', () => {
   buildCertCards();
 
+  // Cabeçalho: contagem e total de horas vêm do próprio array CERTS
+  const meta = $('certs-meta');
+  if (meta) {
+    const horas = CERTS.reduce((soma, c) => soma + (parseInt(c.carga_horaria, 10) || 0), 0);
+    meta.textContent = `${CERTS.length} ${CERTS.length === 1 ? 'certificado' : 'certificados'}` + (horas ? ` · ${horas} horas` : '');
+  }
+
   // Mudou entre desktop e celular com um certificado aberto: reposiciona o painel
   mqStacked.addEventListener('change', () => {
     if (selectedIndex !== null) placePanel(selectedIndex);
   });
 
-  const panelCta = document.getElementById('panel-cta');
-  if (panelCta) {
-    panelCta.addEventListener('click', () => {
-      const index = selectedIndex;
-      if (index === null) return;
-      openPdfViewer(CERTS[index]);
-    });
-  }
+  const openViewer = () => { if (selectedIndex !== null) openPdfViewer(selectedIndex); };
+  ['panel-cta', 'panel-preview'].forEach((id) => {
+    const el = $(id);
+    if (el) el.addEventListener('click', openViewer);
+  });
 });
 
 /* ============================================================
@@ -137,7 +155,7 @@ function observeCardBg(card, bg) {
 }
 
 function buildCertCards() {
-  const row = document.getElementById('certs-row');
+  const row = $('certs-row');
   if (!row) return;
 
   row.innerHTML = '';
@@ -148,7 +166,9 @@ function buildCertCards() {
     card.dataset.index = i;
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
-    card.setAttribute('aria-label', cert.titulo.replace(/\n/g, ' '));
+    card.setAttribute('aria-label', plain(cert));
+    card.setAttribute('aria-expanded', 'false');
+    card.setAttribute('aria-controls', 'cert-panel');
     card.setAttribute('data-reveal', '');
     card.dataset.revealDelay = Math.min(i * 70, 280);
 
@@ -201,7 +221,13 @@ function buildCertCards() {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         selectCertificate(i);
+        return;
       }
+      // ←/→ movem o foco entre os cards (↑/↓ também, na lista empilhada)
+      const dir = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: mqStacked.matches ? 1 : 0, ArrowUp: mqStacked.matches ? -1 : 0 }[e.key];
+      if (!dir) return;
+      e.preventDefault();
+      row.querySelectorAll('.cert-card')[wrap(i + dir)].focus();
     });
   });
 }
@@ -211,20 +237,19 @@ function buildCertCards() {
    ============================================================ */
 function fillPanel(index) {
   const cert = CERTS[index];
+  const title = plain(cert);
 
-  const panelCounterEl   = document.getElementById('panel-counter');
-  const panelTitleEl     = document.getElementById('panel-title');
-  const panelInstEl      = document.getElementById('panel-inst');
-  const panelCargaWrap   = document.getElementById('panel-carga-wrap');
-  const panelCargaEl     = document.getElementById('panel-carga');
-  const panelConclusaoEl = document.getElementById('panel-conclusao');
-  const panelPreviewImg  = document.getElementById('panel-preview-img');
-  const panelPreviewPh   = document.getElementById('panel-preview-placeholder');
+  const panelCargaWrap  = $('panel-carga-wrap');
+  const panelCargaEl    = $('panel-carga');
+  const panelPreviewBtn = $('panel-preview');
+  const panelPreviewImg = $('panel-preview-img');
+  const panelPreviewPh  = $('panel-preview-placeholder');
+  const previewSrc      = cert.thumb_path || cert.full_cert_path;
 
-  if (panelCounterEl) panelCounterEl.textContent = `${String(index + 1).padStart(2, '0')} / ${String(CERTS.length).padStart(2, '0')}`;
-  if (panelTitleEl) panelTitleEl.textContent = cert.titulo.replace(/\n/g, ' ');
-  if (panelInstEl) panelInstEl.textContent = cert.instituicao;
-  if (panelConclusaoEl) panelConclusaoEl.textContent = cert.conclusao;
+  if ($('panel-counter')) $('panel-counter').textContent = counter(index);
+  if ($('panel-title')) $('panel-title').textContent = title;
+  if ($('panel-inst')) $('panel-inst').textContent = cert.instituicao;
+  if ($('panel-conclusao')) $('panel-conclusao').textContent = cert.conclusao;
 
   if (panelCargaWrap && panelCargaEl) {
     if (cert.carga_horaria) {
@@ -235,10 +260,13 @@ function fillPanel(index) {
     }
   }
 
+  if (panelPreviewBtn) panelPreviewBtn.setAttribute('aria-label', `Ampliar certificado: ${title}`);
+
+  // Prévia leve (thumb); a imagem completa só é baixada no visualizador
   if (panelPreviewImg && panelPreviewPh) {
-    if (cert.full_cert_path) {
-      panelPreviewImg.src = cert.full_cert_path;
-      panelPreviewImg.alt = cert.titulo.replace(/\n/g, ' ');
+    if (previewSrc) {
+      panelPreviewImg.src = previewSrc;
+      panelPreviewImg.alt = ''; // o nome acessível é o aria-label do botão
       panelPreviewImg.style.display = 'block';
       panelPreviewPh.style.display = 'none';
     } else {
@@ -250,15 +278,17 @@ function fillPanel(index) {
 
 function setActiveCard(index) {
   document.querySelectorAll('.cert-card').forEach(card => {
-    card.classList.toggle('active', Number(card.dataset.index) === index);
+    const active = Number(card.dataset.index) === index;
+    card.classList.toggle('active', active);
+    card.setAttribute('aria-expanded', String(active));
   });
 }
 
 /* Coloca o painel no lugar certo: logo depois do card (empilhado) ou
    depois da galeria (desktop). */
 function placePanel(index) {
-  const panelEl = document.getElementById('cert-panel');
-  const row = document.getElementById('certs-row');
+  const panelEl = $('cert-panel');
+  const row = $('certs-row');
   if (!panelEl || !row) return;
 
   const anchor = mqStacked.matches
@@ -270,24 +300,25 @@ function placePanel(index) {
   }
 }
 
-/* Fecha o painel e desmarca o card (clique no card já aberto, ou Enter/Espaço) */
+/* Fecha o painel e desmarca o card (clique no card já aberto). */
 function closePanel() {
-  const panelEl = document.getElementById('cert-panel');
+  const panelEl = $('cert-panel');
   if (!panelEl) return;
 
   panelEl.classList.remove('is-open');
   setActiveCard(-1);
   selectedIndex = null;
 
-  // Espera a transição de saída (0.4s) antes de esconder; se o usuário
-  // abrir outro certificado nesse meio-tempo, não esconde.
+  // Espera a transição de saída (0.4s) antes de esconder (display:none:
+  // o espaço do painel some junto); se o usuário abrir outro certificado
+  // nesse meio-tempo, não esconde.
   setTimeout(() => {
     if (selectedIndex === null) panelEl.setAttribute('hidden', '');
   }, 400);
 }
 
 function selectCertificate(index) {
-  const panelEl = document.getElementById('cert-panel');
+  const panelEl = $('cert-panel');
   if (!panelEl) return;
 
   // Clicou de novo no certificado que já está aberto → fecha
@@ -295,6 +326,12 @@ function selectCertificate(index) {
     closePanel();
     return;
   }
+
+  const hint = $('certs-hint');
+  if (hint) hint.classList.add('is-done');
+
+  // Mover o painel no DOM (layout empilhado) faz o navegador perder o foco
+  const focused = panelEl.contains(document.activeElement) ? document.activeElement : null;
 
   setActiveCard(index);
 
@@ -325,13 +362,14 @@ function selectCertificate(index) {
   }
 
   selectedIndex = index;
+  if (focused) focused.focus({ preventScroll: true });
 
   if (mqStacked.matches) {
     // Card no topo (abaixo do header) com o painel logo embaixo dele
     const card = document.querySelector(`.cert-card[data-index="${index}"]`);
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else if (window.matchMedia('(max-width: 1024px)').matches) {
-    // Tela compacta: o painel abre abaixo da galeria e pode ficar fora da tela
+  } else {
+    // Desktop: o painel abre abaixo da galeria e pode ficar fora da tela
     panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
@@ -341,6 +379,8 @@ function selectCertificate(index) {
    Mostra a imagem em alta resolução (full_cert_path) e oferece um
    botão discreto "Baixar PDF" que abre pdf_path em nova aba quando
    existir (fica oculto se não houver PDF cadastrado).
+   Barra superior (título, contador, baixar, fechar), setas ‹ ›,
+   carregamento, foco preso no diálogo; ←/→ trocam e Esc fecha.
    ============================================================ */
 function buildPdfViewer() {
   if (viewerEl) return;
@@ -349,26 +389,125 @@ function buildPdfViewer() {
   viewerEl.className = 'pdf-viewer';
   viewerEl.setAttribute('role', 'dialog');
   viewerEl.setAttribute('aria-modal', 'true');
+  viewerEl.setAttribute('aria-labelledby', 'pdf-viewer-title');
   viewerEl.innerHTML = `
     <div class="pdf-viewer__backdrop"></div>
     <div class="pdf-viewer__box">
-      <button class="pdf-viewer__close" id="pdf-viewer-close" aria-label="Fechar">✕</button>
-      <div id="pdf-viewer-content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
-      <a class="pdf-viewer__download" id="pdf-viewer-download" href="#" target="_blank" rel="noopener" hidden>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-        </svg>
-        Baixar PDF
-      </a>
+      <div class="pdf-viewer__bar">
+        <h3 class="pdf-viewer__title" id="pdf-viewer-title"></h3>
+        <span class="pdf-viewer__counter" id="pdf-viewer-counter"></span>
+        <a class="pdf-viewer__download" id="pdf-viewer-download" href="#" target="_blank" rel="noopener" hidden>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Baixar PDF
+        </a>
+        <button class="pdf-viewer__close" id="pdf-viewer-close" type="button" aria-label="Fechar visualizador">${ICON.close}</button>
+      </div>
+      <div class="pdf-viewer__stage" id="pdf-viewer-content">
+        <button class="pdf-viewer__nav pdf-viewer__nav--prev" id="pdf-viewer-prev" type="button" aria-label="Certificado anterior">${ICON.prev}</button>
+        <button class="pdf-viewer__nav pdf-viewer__nav--next" id="pdf-viewer-next" type="button" aria-label="Próximo certificado">${ICON.next}</button>
+        <span class="pdf-viewer__loader" role="status">CARREGANDO…</span>
+      </div>
     </div>
   `;
   document.body.appendChild(viewerEl);
 
-  document.getElementById('pdf-viewer-close').addEventListener('click', closePdfViewer);
+  if (CERTS.length < 2) {
+    $('pdf-viewer-prev').hidden = true;
+    $('pdf-viewer-next').hidden = true;
+  }
+
+  $('pdf-viewer-close').addEventListener('click', closePdfViewer);
+  $('pdf-viewer-prev').addEventListener('click', () => showInViewer(wrap(viewerIndex - 1)));
+  $('pdf-viewer-next').addEventListener('click', () => showInViewer(wrap(viewerIndex + 1)));
   viewerEl.querySelector('.pdf-viewer__backdrop').addEventListener('click', closePdfViewer);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closePdfViewer();
+  document.addEventListener('keydown', onViewerKeydown);
+}
+
+function onViewerKeydown(e) {
+  // O teclado é ouvido o tempo todo: só age se o visualizador está aberto
+  if (!viewerEl || !viewerEl.classList.contains('open')) return;
+
+  if (e.key === 'Escape') {
+    closePdfViewer();
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    showInViewer(wrap(viewerIndex + (e.key === 'ArrowRight' ? 1 : -1)));
+  } else if (e.key === 'Tab') {
+    // Foco preso: Tab/Shift+Tab circulam só dentro do diálogo
+    const items = [...viewerEl.querySelectorAll('button, a[href]')].filter(el => !el.hidden && !el.disabled);
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const cur = document.activeElement;
+    if (!viewerEl.contains(cur) || (e.shiftKey && cur === first)) {
+      e.preventDefault();
+      (e.shiftKey ? last : first).focus();
+    } else if (!e.shiftKey && cur === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+}
+
+function showViewerMessage(stage, html) {
+  const msg = document.createElement('div');
+  msg.className = 'pdf-viewer__empty';
+  msg.innerHTML = html;
+  stage.prepend(msg);
+}
+
+/* Troca o certificado exibido (título, contador, PDF e imagem) */
+function showInViewer(index) {
+  viewerIndex = index;
+  const cert = CERTS[index];
+  const title = plain(cert);
+  const stage = $('pdf-viewer-content');
+  const downloadBtn = $('pdf-viewer-download');
+
+  $('pdf-viewer-title').textContent = title;
+  $('pdf-viewer-title').title = title;
+  $('pdf-viewer-counter').textContent = counter(index);
+
+  if (cert.pdf_path) {
+    downloadBtn.href = cert.pdf_path;
+    downloadBtn.hidden = false;
+  } else {
+    downloadBtn.hidden = true;
+    downloadBtn.removeAttribute('href');
+  }
+
+  stage.querySelectorAll('.pdf-viewer__img, .pdf-viewer__empty').forEach(el => el.remove());
+
+  if (!cert.full_cert_path) {
+    stage.classList.remove('is-loading');
+    showViewerMessage(stage, `
+      Imagem em alta resolução ainda não disponibilizada.<br>
+      Adicione o caminho em <strong>full_cert_path</strong> no array CERTS.
+    `);
+    return;
+  }
+
+  const img = new Image();
+  img.className = 'pdf-viewer__img';
+  img.decoding = 'async';
+  img.alt = title;
+  stage.classList.add('is-loading');
+
+  // isConnected: ignora eventos de uma imagem já substituída por outra
+  img.addEventListener('load', () => {
+    if (img.isConnected) stage.classList.remove('is-loading');
   });
+  img.addEventListener('error', () => {
+    if (!img.isConnected) return;
+    img.remove();
+    stage.classList.remove('is-loading');
+    showViewerMessage(stage, 'Não foi possível carregar a imagem.<br>Use "Baixar PDF".');
+  });
+
+  img.src = cert.full_cert_path;
+  stage.prepend(img);
 }
 
 /* Trava o scroll da página enquanto o visualizador está aberto.
@@ -392,39 +531,25 @@ function unlockPageScroll() {
   }
 }
 
-function openPdfViewer(cert) {
+function openPdfViewer(index) {
   buildPdfViewer();
-  const content = document.getElementById('pdf-viewer-content');
-  const downloadBtn = document.getElementById('pdf-viewer-download');
-
-  if (cert.full_cert_path) {
-    content.innerHTML = `<img class="pdf-viewer__img" decoding="async" src="${cert.full_cert_path}" alt="${cert.titulo.replace(/\n/g, ' ')}">`;
-  } else {
-    content.innerHTML = `
-      <div class="pdf-viewer__empty">
-        Imagem em alta resolução ainda não disponibilizada.<br>
-        Adicione o caminho em <strong>full_cert_path</strong> no array CERTS.
-      </div>
-    `;
-  }
-
-  if (cert.pdf_path) {
-    downloadBtn.href = cert.pdf_path;
-    downloadBtn.hidden = false;
-  } else {
-    downloadBtn.hidden = true;
-    downloadBtn.removeAttribute('href');
-  }
-
+  viewerOpener = document.activeElement; // quem abriu recebe o foco de volta
+  showInViewer(index);
   viewerEl.classList.add('open');
   lockPageScroll();
+  $('pdf-viewer-close').focus({ preventScroll: true });
 }
 
 function closePdfViewer() {
-  // O Escape é ouvido o tempo todo: só age se o visualizador está aberto
   if (!viewerEl || !viewerEl.classList.contains('open')) return;
   viewerEl.classList.remove('open');
   unlockPageScroll();
+
+  // Navegou pelas setas do visualizador: painel e card acompanham
+  if (selectedIndex !== null && viewerIndex !== selectedIndex) selectCertificate(viewerIndex);
+
+  if (viewerOpener && viewerOpener.isConnected) viewerOpener.focus({ preventScroll: true });
+  viewerOpener = null;
 }
 
 })();

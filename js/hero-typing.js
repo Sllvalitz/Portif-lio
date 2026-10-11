@@ -13,6 +13,10 @@
 
    Tudo só começa DEPOIS do loading: o loading.js adiciona
    body.nav-ready quando a tela de loading sai do DOM.
+
+   Quando a página volta pela logo do header (html.from-logo, definido
+   pelo loading.js), o hero NÃO repete a entrada: aparece pronto, com o
+   caret no fim e só os flickers contínuos ligados.
 ════════════════════════════════════════════════════════════ */
 
 (function () {
@@ -100,11 +104,14 @@
     const lastChar = lines[lastLine].chars.length - 1;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fromLogo = document.documentElement.classList.contains('from-logo');
 
-    if (prefersReducedMotion) {
-      // Sem animação: texto completo e caret parado no final.
+    if (prefersReducedMotion || fromLogo) {
+      // Sem entrada: texto completo e caret parado no final.
       lines.forEach((l) => l.chars.forEach((c) => c.classList.add('is-typed')));
       placeCaret(lastLine, lastChar, true);
+      // Pela logo o hero continua "vivo" (flicker contínuo), só não repete a entrada
+      if (fromLogo && !prefersReducedMotion) hero.classList.add('hero-live', 'hero--instant');
       return;
     }
 

@@ -17,10 +17,12 @@
   /* Cada glitch: pouco antes da palavra real "before" aparecer no
      texto, o stream digita "wrong", risca, e corrige para o trecho
      real. Se "before" não existir no texto (bio foi editada), o
-     glitch correspondente é simplesmente pulado. */
+     glitch correspondente é simplesmente pulado. A ordem segue a do
+     texto. "wrong" é o termo maior/mais amplo que seria fácil
+     exagerar — o que vale (e fica) é o real. */
   const GLITCHES = [
-    { before: 'Edge AI', wrong: 'Deep Learning' },
-    { before: 'Ager',    wrong: 'Atlas' }
+    { before: 'Edge AI',      wrong: 'Deep Learning' },
+    { before: 'Linux/Docker', wrong: 'Kubernetes' }
   ];
 
   const CHAR_DELAY_MS   = 16;  // base por caractere

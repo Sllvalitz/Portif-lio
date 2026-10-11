@@ -247,6 +247,11 @@
     hero-subtitle-flicker 2s linear 600ms infinite;
 }
 
+/* Pela logo (hero.hero--instant): sem a entrada em salto, só o flicker contínuo */
+.hero--instant.hero-live .hero__da-silva:has(.hero__char):not(:has(.hero__char:not(.is-typed))) ~ .hero__subtitle {
+  animation: hero-subtitle-flicker 2s linear infinite;
+}
+
 @keyframes hero-subtitle-in {
   0%   { opacity: 0; }
   15%  { opacity: 1; }

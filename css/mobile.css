@@ -106,6 +106,25 @@
     opacity: 0.85;
   }
 
+  /* Botão de currículo: só ícone, destacado em verde, antes das ações */
+  .site-header__cv {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-left: auto;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .site-header__cv-label { display: none; }
+  .site-header__cv svg { width: 18px; height: 18px; }
+  .site-header__cv:hover { transform: none; }
+  .site-header__cv:active { background: var(--text-heading); }
+
   /* 3 risquinhos → X quando aberto */
   .site-header__menu-btn {
     flex-direction: column;
@@ -261,6 +280,19 @@
     bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   }
 
+  /* ---- CABEÇALHO DE SEÇÃO ----
+     32px até o conteúdo. Os seletores repetem os do desktop (s2/s4/s5), que
+     têm margin própria: com a mesma especificidade, o mobile.css (carregado
+     por último) é quem vale. */
+  .section-header,
+  #certs .section-header,
+  .about__container > .section-header { margin: 0 0 32px; }
+
+  /* Projetos é grid com gap de 24px entre as linhas: 8 + 24 = 32 */
+  .projects__main > .section-header { margin: 0 0 8px; }
+
+  .section-header__title { font-size: 32px; }
+
   /* =============================================================
      SOBRE MIM — 1) bio  2) foto  3) formação + tecnologias
      A linha do tempo não aparece no celular.
@@ -281,8 +313,6 @@
      o que permite reordenar foto / formação / tecnologias com `order`. */
   .about__left-col,
   .about__right-col { display: contents; }
-
-  .timeline-v { display: none; }
 
   .about__bio-title {
     order: 1;
@@ -575,6 +605,22 @@
     height: 80dvh;
   }
 
+  /* Barra do visualizador em 2 linhas: título (até 2 linhas) em cima;
+     contador · baixar PDF · fechar embaixo */
+  .pdf-viewer__bar { flex-wrap: wrap; gap: 8px 10px; }
+
+  .pdf-viewer__title {
+    order: -1;
+    flex: 0 0 100%;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.4;
+  }
+
+  .pdf-viewer__counter { flex: 1; }
+
   /* =============================================================
      FOOTER — uma coluna
      ============================================================= */
@@ -605,6 +651,9 @@
 
   .site-footer__email { overflow-wrap: anywhere; }
 
+  /* alvo de toque confortável para o botão de copiar */
+  .site-footer__copy { width: 40px; height: 40px; }
+
   .site-footer__social {
     align-items: center;
     text-align: center;
@@ -632,25 +681,14 @@
      PÁGINA 404
      ============================================================= */
   .notfound { padding: calc(96px + env(safe-area-inset-top, 0px)) 0 calc(84px + env(safe-area-inset-bottom, 0px)); }
-  .notfound__logo { top: calc(16px + env(safe-area-inset-top, 0px)); left: var(--m-gutter); width: 38px; height: 38px; }
+  .notfound__logo { top: calc(16px + env(safe-area-inset-top, 0px)); left: var(--m-gutter); width: 38px; height: 38px; border-radius: 10px; }
   .notfound__code { font-size: min(30vw, 160px); }
   .notfound__title { font-size: clamp(26px, 7vw, 36px); }
   .notfound__terminal { font-size: 12px; }
   .notfound__actions { gap: 18px 28px; }
   .notfound__hud--tr { display: none; }
-  .notfound__hud--bl,
   .notfound__hud--br { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); font-size: 9px; letter-spacing: 0.12em; }
-  .notfound__hud--bl { left: var(--m-gutter); }
   .notfound__hud--br { right: var(--m-gutter); }
-}
-
-/* ---- Tablet em retrato: as duas formações lado a lado ---- */
-@media (min-width: 540px) and (max-width: 900px) {
-  .about__edu-grid {
-    grid-template-columns: repeat(2, minmax(0, max-content));
-    justify-content: center;
-    gap: 24px 56px;
-  }
 }
 
 /* ---- Telas de toque (sem hover): o que antes só aparecia ao passar o
@@ -685,6 +723,33 @@
   .site-header { left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); padding-right: 6px; }
   .site-header__actions { gap: 6px; }
   .site-header__icon,
+  .site-header__cv,
   .site-header__menu-btn { width: 38px; height: 38px; }
   .project-modal__tab { font-size: 9.5px; letter-spacing: 0.03em; }
+}
+
+
+/* =============================================================
+   PROJETOS / ARTIGOS — barra de controles e listagem
+   (celular e tablet em retrato; acima de 900px nada muda)
+   ============================================================= */
+@media (max-width: 900px) {
+  /* o grid já tem 24px de gap + 8px do cabeçalho */
+  .browse-controls { margin-top: 0; padding-bottom: 16px; gap: 14px; }
+
+  .browse-tab { padding: 12px 16px; min-height: 44px; font-size: 10px; letter-spacing: 0.12em; }
+  .browse-chip,
+  .browse-more { min-height: 36px; padding: 8px 14px; font-size: 10.5px; }
+
+  .article-card { padding: 20px 18px; }
+  .article-card__title { font-size: 22px; }
+  .article-card__summary { font-size: 14px; }
+
+  /* celular: o painel inativo sai do fluxo (no desktop ele só fica invisível) */
+  .browse-panel.is-inactive { display: none; }
+}
+
+@media (max-width: 360px) {
+  .browse-tab { padding: 12px 12px; letter-spacing: 0.06em; }
+  .browse-count { letter-spacing: 0.08em; }
 }
