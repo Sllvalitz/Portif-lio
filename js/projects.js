@@ -363,6 +363,7 @@ if (projects.length) setProject(0, false);
      o histórico nunca fica poluído e o Voltar do navegador não reabre o modal.
      `landed` marca sessões iniciadas por acesso direto à URL do projeto. */
   const ROUTE_PREFIX = '/projetos/';
+  const NOT_FOUND_URL = '/404.html'; // página 404 do site (a mesma que o host serve para rotas inexistentes)
   const projectPath = (idx) => ROUTE_PREFIX + encodeURIComponent(projects[idx].id);
   const currentDepth = () => (history.state && history.state.depth) || 0;
 
@@ -692,13 +693,16 @@ function renderDifficultyStars(difficulty) {
 
   window.addEventListener('popstate', syncModalWithLocation);
 
-  // Acesso direto a /projetos/<slug>: abre o projeto; slug desconhecido volta a "/".
+  // Acesso direto a /projetos/<slug>: abre o projeto; slug desconhecido mostra a página 404.
+  // (O host reescreve qualquer /projetos/<slug> para o index.html, então só o JS sabe se o slug existe.)
   if (location.pathname.indexOf(ROUTE_PREFIX) === 0) {
     if (indexFromLocation() >= 0) {
       if (!history.state) history.replaceState({ depth: 0, landed: true }, '', location.pathname);
       syncModalWithLocation();
     }
-    else if (!projectsFailed) history.replaceState(null, '', '/'); // com falha de carga a URL é mantida (um F5 tenta de novo)
+    // replace: a URL inválida não fica no histórico (o Voltar não cai nela de novo).
+    // Com falha de carga dos dados não dá para saber se o slug existe: a URL é mantida (um F5 tenta de novo).
+    else if (!projectsFailed) location.replace(NOT_FOUND_URL);
   }
 
   btnPrev.addEventListener('click', () => navigateModal(-1));
