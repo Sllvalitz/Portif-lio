@@ -1,0 +1,35 @@
+[
+  {
+    "id": "legacy-server",
+    "title": "Legacy Server",
+    "tags": [
+      "Debian",
+      "Docker",
+      "CasaOS",
+      "Nginx",
+      "Tailscale",
+      "Btrfs"
+    ],
+    "description": "Servidor doméstico 24/7 (~10W) construído a partir da placa-mãe de um notebook Acer ES1-511. Roda Debian 13 com CasaOS e Docker, proxy reverso Nginx Proxy Manager com SSL, VPN Tailscale, filtro DNS AdGuard Home, segurança com UFW, CrowdSec, ClamAV e Lynis, backup criptografado via Rclone, além de Jellyfin, Samba, Suwayomi e servidores Minecraft. Gabinete customizado impresso em 3D.",
+    "thumb_url": "",
+    "images": [
+      "assets/imagens/hand.png",
+      "assets/imagens/hand.png",
+      "assets/imagens/hand.png"
+    ],
+    "guideMarkdown": "./projects/legacy-server/guide.md",
+    "guidePdf": "./projects/legacy-server/guide.pdf",
+    "github": "https://github.com/Sllvalitz/legacy-server",
+    "youtube": "",
+    "difficulty": {
+      "level": 3,
+      "descriptions": {
+        "1": "Necessário ter noção básica de sistemas operacionais.",
+        "2": "Requer conhecimentos básicos de Linux e uso de terminal.",
+        "3": "Requer domínio intermediário de Linux, Docker, redes (DNS, proxy reverso, VPN) e segurança básica de servidores.",
+        "4": "Requer conhecimentos avançados de administração de sistemas, hardening e automação de rotinas.",
+        "5": "Requer domínio avançado de múltiplas tecnologias e capacidade de projetar/implementar a solução de ponta a ponta."
+      }
+    }
+  }
+]

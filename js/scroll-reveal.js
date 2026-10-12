@@ -11,8 +11,12 @@
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const targets = document.querySelectorAll('[data-reveal]');
+  let observer = null;
+
+  // Observa os [data-reveal] de um container. Também é exposta como
+  // window.PortfolioReveal.observe() para conteúdo criado depois do
+  // DOMContentLoaded (ex.: cards de certificados, que vêm de data/certificates.json).
+  function reveal(targets) {
     if (!targets.length) return;
 
     if (prefersReducedMotion) {
@@ -20,7 +24,7 @@
       return;
     }
 
-    const observer = new IntersectionObserver((entries, obs) => {
+    if (!observer) observer = new IntersectionObserver((entries, obs) => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
 
@@ -37,5 +41,13 @@
     });
 
     targets.forEach(el => observer.observe(el));
+  }
+
+  window.PortfolioReveal = {
+    observe: (root) => reveal((root || document).querySelectorAll('[data-reveal]'))
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    reveal(document.querySelectorAll('[data-reveal]'));
   });
 })();

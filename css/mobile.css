@@ -106,25 +106,6 @@
     opacity: 0.85;
   }
 
-  /* Botão de currículo: só ícone, destacado em verde, antes das ações */
-  .site-header__cv {
-    position: relative;
-    top: auto;
-    right: auto;
-    margin-left: auto;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    justify-content: center;
-    border-radius: 10px;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .site-header__cv-label { display: none; }
-  .site-header__cv svg { width: 18px; height: 18px; }
-  .site-header__cv:hover { transform: none; }
-  .site-header__cv:active { background: var(--text-heading); }
-
   /* 3 risquinhos → X quando aberto */
   .site-header__menu-btn {
     flex-direction: column;
@@ -190,6 +171,20 @@
   }
 
   .navbar__links li a:active { background: var(--white-a06); }
+
+  /* Currículo: último item do painel, em largura total */
+  .navbar__cv {
+    display: flex;
+    justify-content: center;
+    margin: 6px 0 0;
+    padding: 15px 14px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    border-radius: 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .navbar__cv:active { background: var(--accent-green-a22); }
 
   /* o prompt "›" fica sempre visível (não há hover no toque) */
   .navbar__chev {
@@ -723,7 +718,6 @@
   .site-header { left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); padding-right: 6px; }
   .site-header__actions { gap: 6px; }
   .site-header__icon,
-  .site-header__cv,
   .site-header__menu-btn { width: 38px; height: 38px; }
   .project-modal__tab { font-size: 9.5px; letter-spacing: 0.03em; }
 }

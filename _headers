@@ -12,17 +12,19 @@
 
 # ── DEEP LINKING: /projetos/<slug> ─────────────────────────────────────
 # O JavaScript só cuida da History API. Num acesso direto (ou F5) a
-# /projetos/legacy-server o SERVIDOR precisa responder com o index.html
-# (status 200, sem redirecionar, mantendo a URL). Slugs = `id` em js/projects.js.
-# Só os slugs válidos são reescritos; qualquer outra URL continua dando 404.
+# /projetos/<slug> o SERVIDOR precisa responder com o index.html
+# (status 200, sem redirecionar, mantendo a URL). UMA regra cobre todos os
+# projetos (um único segmento depois de /projetos/): quem valida o slug é o
+# JS, contra o `id` de data/projects.json — slug desconhecido volta para "/".
+# Arquivos que existem de verdade continuam sendo servidos normalmente.
+# Adicionar um projeto novo NÃO exige mexer nesta configuração.
 #
 # Netlify / Cloudflare Pages — arquivo `_redirects` na raiz (não vai aqui):
-#   /projetos/legacy-server  /index.html  200
+#   /projetos/*  /index.html  200
 # Nginx:
-#   location = /projetos/legacy-server { try_files /index.html =404; }
-# Vercel (vercel.json): "rewrites": [{ "source": "/projetos/legacy-server", "destination": "/index.html" }]
+#   location ~ ^/projetos/[^/]+/?$ { try_files /index.html =404; }
+# Vercel (vercel.json): "rewrites": [{ "source": "/projetos/:slug", "destination": "/index.html" }]
 # GitHub Pages: não suporta rewrite — o acesso direto não funciona nesse host.
-# Ao adicionar um projeto novo em js/projects.js, adicione a regra dele também.
 /projetos/*
   Cache-Control: no-cache
 

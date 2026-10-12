@@ -1,0 +1,57 @@
+[
+  {
+    "titulo": "Capacitação em Sistemas Embarcados e Inteligência Artificial na Borda",
+    "sigla": "PNAAT",
+    "logo_path": "",
+    "thumb_path": "assets/imagens/certs/thumbs/pnaat-embarcados-ia.webp",
+    "full_cert_path": "assets/imagens/certs/Capacitação_em_Sistemas_Embarcados_e_Inteligência_Artificial_na_Borda_74H.webp",
+    "pdf_path": "assets/pdfs/Capacitação_em_Sistemas_Embarcados_e_Inteligência_Artificial_na_Borda_74H.pdf",
+    "instituicao": "FIT - Instituto de Tecnologia",
+    "carga_horaria": "74 Horas",
+    "conclusao": "2026"
+  },
+  {
+    "titulo": "Trilha de Fundamentos em IoT e Edge AI",
+    "sigla": "PNAAT",
+    "logo_path": "",
+    "thumb_path": "assets/imagens/certs/thumbs/pnaat-iot-edge-ai.webp",
+    "full_cert_path": "assets/imagens/certs/Trilha_de_Fundamentos_em_IoT_e _Edge_AI_28H.webp",
+    "pdf_path": "assets/pdfs/Trilha_de_Fundamentos_em_IoT_e _Edge_AI_28H.pdf",
+    "instituicao": "FIT - Instituto de Tecnologia",
+    "carga_horaria": "28 Horas",
+    "conclusao": "2026"
+  },
+  {
+    "titulo": "TXM Challenge Multicenter Negócios e Eventos",
+    "sigla": "TXM",
+    "logo_path": "",
+    "thumb_path": "assets/imagens/certs/thumbs/txm-challenge.webp",
+    "full_cert_path": "assets/imagens/certs/TXM_Challenge_Multicenter_Negócios_e_Eventos_90H.webp",
+    "pdf_path": "assets/pdfs/TXM_Challenge_Multicenter_Negócios_e_Eventos_90H.pdf",
+    "instituicao": "TXM Methods",
+    "carga_horaria": "90 Horas",
+    "conclusao": "2026"
+  },
+  {
+    "titulo": "1º Jornada de Inovação da Agricultura Familiar no Maranhão",
+    "sigla": "1° JSAF",
+    "logo_path": "",
+    "thumb_path": "assets/imagens/certs/thumbs/jornada-saf.webp",
+    "full_cert_path": "assets/imagens/certs/Jornada_de_Inovação_da_Agricultura_Familiar_SAF_Maranhão_e_Agência_Marandu_30H.webp",
+    "pdf_path": "assets/pdfs/Jornada_de_Inovação_da_Agricultura_Familiar_SAF_Maranhão_e_Agência_Marandu_30H.pdf",
+    "instituicao": "Agência Marandu",
+    "carga_horaria": "30 Horas",
+    "conclusao": "2026"
+  },
+  {
+    "titulo": "Programação \n Back-End",
+    "sigla": "SECTI",
+    "logo_path": "",
+    "thumb_path": "assets/imagens/certs/thumbs/back-end-400h.webp",
+    "full_cert_path": "assets/imagens/certs/Programação_Back_End_400H.webp",
+    "pdf_path": "assets/pdfs/Programação_Back_End_400H.pdf",
+    "instituicao": "Secretaria de Ciência, Tecnologia e Inovação",
+    "carga_horaria": "400 Horas",
+    "conclusao": "2025"
+  }
+]

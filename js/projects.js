@@ -1,11 +1,12 @@
 /* ═══════════════════════════════════════════════════════════
    PROJECTS — projects.js
-   Dados dos projetos, carrossel da seção e modal (Visão Geral +
-   Guia em Markdown/PDF). Tudo dentro de uma IIFE: nada vaza para
-   window.
+   Carrossel da seção e modal (Visão Geral + Guia em Markdown/PDF).
+   Os dados dos projetos ficam em data/projects.json (veja o campo-a-campo
+   no bloco "PROJECTS CAROUSEL" abaixo). Tudo dentro de uma IIFE assíncrona:
+   nada vaza para window, e todo o resto só roda depois que o JSON carrega.
 ════════════════════════════════════════════════════════════ */
 
-(function () {
+(async function () {
 
 /* ---- marked (Markdown → HTML): carregado só quando um guia é aberto ---- */
 const MARKED_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js';
@@ -64,30 +65,48 @@ function trapTab(e, box) {
 }
 
 // ---- PROJECTS CAROUSEL ----
-const projects = [
-{
-  id: 'legacy-server',
-  title: 'Legacy Server',
-  tags: ['Debian', 'Docker', 'CasaOS', 'Nginx', 'Tailscale', 'Btrfs'],
-  description: 'Servidor doméstico 24/7 (~10W) construído a partir da placa-mãe de um notebook Acer ES1-511. Roda Debian 13 com CasaOS e Docker, proxy reverso Nginx Proxy Manager com SSL, VPN Tailscale, filtro DNS AdGuard Home, segurança com UFW, CrowdSec, ClamAV e Lynis, backup criptografado via Rclone, além de Jellyfin, Samba, Suwayomi e servidores Minecraft. Gabinete customizado impresso em 3D.',
-  thumb_url: '',
-  images: ['assets/imagens/hand.png', 'assets/imagens/hand.png', 'assets/imagens/hand.png'],
-  guideMarkdown: './projects/legacy-server/guide.md',
-  guidePdf: './projects/legacy-server/guide.pdf',
-  github: 'https://github.com/Sllvalitz/legacy-server',
-  youtube: '',
-  difficulty: {
-    level: 3,
-    descriptions: {
-      1: 'Necessário ter noção básica de sistemas operacionais.',
-      2: 'Requer conhecimentos básicos de Linux e uso de terminal.',
-      3: 'Requer domínio intermediário de Linux, Docker, redes (DNS, proxy reverso, VPN) e segurança básica de servidores.',
-      4: 'Requer conhecimentos avançados de administração de sistemas, hardening e automação de rotinas.',
-      5: 'Requer domínio avançado de múltiplas tecnologias e capacidade de projetar/implementar a solução de ponta a ponta.'
-    }
-  }
+/* Dados: data/projects.json (array). Para cadastrar um projeto, acrescente um objeto:
+     id             (obrigatório) slug único — vira a URL /projetos/<id>; não mude depois de publicado
+     title          (obrigatório) título
+     tags           (obrigatório) array de strings (alimentam os filtros; lógica OU)
+     description    texto da visão geral
+     thumb_url      miniatura/imagem de destaque ('' = placeholder)
+     images         array de caminhos para o carrossel de imagens do modal
+     guideMarkdown  caminho do guia .md (aba "Guia do Projeto"); '' = sem guia
+     guidePdf       caminho do PDF do guia (o botão só aparece se o arquivo existir)
+     github, youtube  links externos ('' = botão oculto)
+     difficulty     { level: 1-5, descriptions: { "1": '...', ... } }
+   O caminho do JSON é relativo ao <base href="/"> do index.html: funciona em /, /projetos/<id>... */
+const PROJECTS_URL = 'data/projects.json';
+let projectsFailed = false;
+
+function validateProjects(data) {
+  if (!Array.isArray(data)) throw new Error(`${PROJECTS_URL}: o conteúdo deve ser um array de projetos`);
+  const seen = new Set();
+  data.forEach((p, i) => {
+    if (!p || typeof p.id !== 'string' || !p.id) throw new Error(`${PROJECTS_URL}: item ${i} sem "id" (string)`);
+    if (typeof p.title !== 'string') throw new Error(`${PROJECTS_URL}: projeto "${p.id}" sem "title" (string)`);
+    if (!Array.isArray(p.tags)) throw new Error(`${PROJECTS_URL}: projeto "${p.id}" sem "tags" (array)`);
+    if (seen.has(p.id)) console.warn('[projetos] id duplicado:', p.id); // o deep link usa o primeiro
+    if (!/^[A-Za-z0-9._~-]+$/.test(p.id)) console.warn('[projetos] id fora do padrão de URL (use letras, números, - . _ ~):', p.id); // vira /projetos/<id>
+    seen.add(p.id);
+  });
 }
-];
+
+// Em caso de falha devolve [] (a seção mostra um aviso; os artigos continuam funcionando).
+const projects = await (async () => {
+  try {
+    const res = await fetch(PROJECTS_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status} ao carregar ${PROJECTS_URL}`);
+    const data = await res.json();
+    validateProjects(data);
+    return data;
+  } catch (err) {
+    console.error('[projetos] Falha ao carregar ou validar os dados:', err);
+    projectsFailed = true;
+    return [];
+  }
+})();
 
 let currentProject = 0;                         // índice REAL em `projects` (o modal e as URLs usam o mesmo)
 let visible = projects.map((_, i) => i);        // índices reais que passam no filtro de tags
@@ -306,7 +325,7 @@ function setProjectsViewActive(active) {
   }
 }
 
-setProject(0, false);
+if (projects.length) setProject(0, false);
 
 // ---- PROJECT MODAL (expansão de projeto) ----
 // Etapa 1: estrutura, abertura/fechamento, header, navegação entre
@@ -592,7 +611,7 @@ function renderDifficultyStars(difficulty) {
 
   // Abertura pelo usuário: mostra o modal e empilha /projetos/<id>.
   function openProjectModal(idx) {
-    if (closing || modal.classList.contains('open')) return; // já aberto ou fechando: não empilha outra entrada
+    if (!projects[idx] || closing || modal.classList.contains('open')) return; // sem dados, já aberto ou fechando: não empilha outra entrada
     showProjectModal(idx);
     history.pushState({ depth: 1 }, '', projectPath(idx));
   }
@@ -679,7 +698,7 @@ function renderDifficultyStars(difficulty) {
       if (!history.state) history.replaceState({ depth: 0, landed: true }, '', location.pathname);
       syncModalWithLocation();
     }
-    else history.replaceState(null, '', '/');
+    else if (!projectsFailed) history.replaceState(null, '', '/'); // com falha de carga a URL é mantida (um F5 tenta de novo)
   }
 
   btnPrev.addEventListener('click', () => navigateModal(-1));
@@ -713,7 +732,9 @@ function renderDifficultyStars(difficulty) {
 // Reutiliza o array `projects` (via applyProjectFilter). As publicações vêm de
 // js/articles.js (dados separados) e sempre apontam para uma publicação EXTERNA.
 (function () {
-  const ARTICLES = window.PORTFOLIO_ARTICLES || [];
+  // Preenchido quando data/articles.json termina de carregar (ver "CARGA DOS DADOS" no fim do bloco).
+  let ARTICLES = [];
+  let articlesFailed = false;
 
   const section = document.getElementById('projects');
   const controlsEl = document.getElementById('browse-controls');
@@ -730,6 +751,8 @@ function renderDifficultyStars(difficulty) {
   const listEl = document.getElementById('articles-list');
   const emptyEl = document.getElementById('browse-empty');
   const emptyResetBtn = document.getElementById('browse-empty-reset');
+  const emptyTextEl = emptyEl.querySelector('.browse-empty__text');
+  const EMPTY_TEXT = emptyTextEl.textContent;
   const hintEl = section.querySelector('.section-header__hint');
 
   const state = {
@@ -776,14 +799,14 @@ function renderDifficultyStars(difficulty) {
 
   const publicationLink = (a) => (a.demo ? null : safeExternalUrl(a.publicationUrl));
 
-  // ids de publicações devem ser únicos
-  (function warnDuplicateIds() {
+  // ids de publicações devem ser únicos (chamada após o carregamento dos dados)
+  function warnDuplicateIds() {
     const seen = new Set();
     ARTICLES.forEach((a) => {
       if (seen.has(a.id)) console.warn('[artigos] id duplicado:', a.id);
       seen.add(a.id);
     });
-  })();
+  }
 
   /* ---- CHIPS ----
      Aba Artigos:  [categorias] | [Todas as tags] [palavras-chave…] [+ FILTROS]
@@ -941,6 +964,12 @@ function renderDifficultyStars(difficulty) {
     countEl.textContent = pad2(count) + (count === 1 ? ' resultado' : ' resultados');
     setPanelActive(panels.projects, tab === 'projects' && count > 0);
     setPanelActive(panels.articles, tab === 'articles' && count > 0);
+    // Falha ao carregar os dados (data/projects.json / data/articles.json): mensagem própria no lugar do "nenhum resultado"
+    const loadFailed = tab === 'projects' ? projectsFailed : (articlesFailed && ARTICLES.length === 0);
+    emptyTextEl.textContent = loadFailed
+      ? '// não foi possível carregar os ' + (tab === 'projects' ? 'projetos' : 'artigos')
+      : EMPTY_TEXT;
+    emptyResetBtn.hidden = loadFailed;
     emptyEl.hidden = count > 0;
     if (hintEl) hintEl.classList.toggle('is-off', tab !== 'projects'); // visibility: não muda a altura do cabeçalho
     setProjectsViewActive(tab === 'projects' && count > 0);
@@ -1038,6 +1067,18 @@ function renderDifficultyStars(difficulty) {
 
   /* ---- INÍCIO ---- */
   switchTab('projects');
+
+  /* ---- CARGA DOS DADOS ----
+     js/articles.js busca data/articles.json e expõe PORTFOLIO_ARTICLES_READY (sempre
+     resolve). Os projetos não dependem dos artigos, então a aba inicial aparece na hora;
+     ao chegar os dados, só re-renderiza se a aba Artigos já estiver aberta (senão o
+     update() de switchTab('articles') já usa os dados carregados). */
+  Promise.resolve(window.PORTFOLIO_ARTICLES_READY).then(() => {
+    ARTICLES = window.PORTFOLIO_ARTICLES || [];
+    articlesFailed = Boolean(window.PORTFOLIO_ARTICLES_ERROR);
+    warnDuplicateIds();
+    if (state.tab === 'articles') update();
+  });
 })();
 
 })();

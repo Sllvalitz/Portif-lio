@@ -23,6 +23,9 @@
   --nav-link:           var(--text-soft);      /* navbar — repouso */
   --nav-link-hover:     var(--text-heading);   /* navbar — hover/ativo */
   --grid-line:          oklch(0.62 0.06 150 / 0.16);  /* grid CRT do Hero */
+  --accent-green-a12:   oklch(0.82 0.16 150 / 0.12);  /* fundo do botão de currículo */
+  --accent-green-a22:   oklch(0.82 0.16 150 / 0.22);  /* idem, hover/ativo */
+  --accent-green-a45:   oklch(0.82 0.16 150 / 0.45);  /* contorno do botão de currículo */
 
   /* ---- Footer ---- */
   --footer-bg:     oklch(0.1 0.014 160);
@@ -382,58 +385,63 @@ body.nav-ready .site-header {
   }
 }
 
-/* ---- BOTÃO DE CURRÍCULO (header) ----
-   Ação principal do header: fundo verde cheio, na mesma altura da logo e
-   espelhando-a no canto direito. No celular (mobile.css) vira um botão só
-   com ícone, ao lado das redes e do menu. Arquivo: /resume.pdf. */
-.site-header__cv {
-  position: absolute;
-  top: calc(42 * var(--u));
-  right: calc(100 * var(--u));
-  height: max(36px, calc(46 * var(--u)));
-  padding: 0 calc(20 * var(--u));
+/* ---- BOTÃO DE CURRÍCULO (último item da navegação) ----
+   Mesma tipografia dos links (mono, caixa alta, 0.22em) e contorno verde,
+   como um botão da própria navbar. Fica dentro da <nav>, fora do <ul> de
+   âncoras. No celular (mobile.css) é o último item do painel. Arquivo: /resume.pdf. */
+.navbar__cv {
+  margin-left: calc(57.6 * var(--u)); /* mesmo respiro entre os itens da navbar */
+  padding: calc(9 * var(--u)) calc(16 * var(--u));
 
   display: inline-flex;
   align-items: center;
-  gap: calc(10 * var(--u));
+  gap: calc(9 * var(--u));
 
-  background: var(--accent-green);
-  border: 1px solid var(--accent-green);
-  border-radius: calc(4 * var(--u));
-  color: var(--black);
+  background: var(--accent-green-a12);
+  border: 1px solid var(--accent-green-a45);
+  border-radius: calc(6 * var(--u));
+  color: var(--accent-green);
 
   font-family: var(--mono);
+  font-weight: 400;
   font-size: max(10.1px, calc(11.2 * var(--u)));
-  font-weight: 500;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
 
   pointer-events: auto;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
 
-.site-header__cv:hover {
-  background: var(--text-heading);
-  border-color: var(--text-heading);
-  transform: translateY(-1px);
+.navbar__cv:hover,
+.navbar__cv:focus-visible {
+  color: var(--nav-link-hover);
+  border-color: var(--accent-green);
+  background: var(--accent-green-a22);
 }
 
-.site-header__cv:focus-visible {
-  outline: 2px solid var(--white);
+.navbar__cv:focus-visible {
+  outline: 2px solid var(--nav-link-hover);
   outline-offset: 3px;
 }
 
-.site-header__cv svg {
-  width: max(13px, calc(15 * var(--u)));
-  height: max(13px, calc(15 * var(--u)));
+/* ícone acompanha o tamanho do texto e "cai" um pouco no hover (download) */
+.navbar__cv-icon {
+  width: 1.15em;
+  height: 1.15em;
   flex-shrink: 0;
+  transition: transform 0.25s cubic-bezier(.3, 1.3, .4, 1);
 }
 
+.navbar__cv:hover .navbar__cv-icon,
+.navbar__cv:focus-visible .navbar__cv-icon { transform: translateY(1px); }
+
 @media (prefers-reduced-motion: reduce) {
-  .site-header__cv { transition: none; }
-  .site-header__cv:hover { transform: none; }
+  .navbar__cv,
+  .navbar__cv-icon { transition: none; }
+  .navbar__cv:hover .navbar__cv-icon,
+  .navbar__cv:focus-visible .navbar__cv-icon { transform: none; }
 }
 
 /* ---- SECTION INDICATOR ----

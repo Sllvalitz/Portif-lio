@@ -100,7 +100,7 @@
   ],
   "rewrites": [
     {
-      "source": "/projetos/legacy-server",
+      "source": "/projetos/:slug",
       "destination": "/index.html"
     }
   ]

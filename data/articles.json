@@ -1,0 +1,52 @@
+{
+  "categories": [
+    {
+      "id": "cientifica",
+      "label": "Produção científica",
+      "types": [
+        "Artigo científico",
+        "Revisão bibliográfica",
+        "Trabalho em evento científico"
+      ]
+    },
+    {
+      "id": "academica",
+      "label": "Produção acadêmica",
+      "types": [
+        "Iniciação científica",
+        "Projeto de pesquisa",
+        "TCC"
+      ]
+    },
+    {
+      "id": "tecnica",
+      "label": "Produção técnica",
+      "types": [
+        "Relatório técnico",
+        "Documentação de engenharia",
+        "Artigo de divulgação técnica"
+      ]
+    }
+  ],
+  "articles": [
+    {
+      "id": "notebook-antigo-servidor-domestico",
+      "title": "Como transformei um notebook antigo em um servidor doméstico",
+      "category": "tecnica",
+      "type": "Artigo de divulgação técnica",
+      "authors": [
+        "Anderson da Silva"
+      ],
+      "summary": "Um roteiro para reaproveitar um notebook como servidor 24/7: Debian sem ambiente gráfico, serviços em Docker, organização de pastas, acesso remoto por VPN, segurança em camadas e backup.",
+      "keywords": [
+        "Debian",
+        "Docker",
+        "Infraestrutura doméstica",
+        "Acesso remoto",
+        "Segurança"
+      ],
+      "date": "2026-01-01",
+      "demo": true
+    }
+  ]
+}

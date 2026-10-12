@@ -3,8 +3,8 @@
  * SECTION 5 — CERTIFICADOS
  * Portfolio: Anderson da Silva
  *
- * COMO PERSONALIZAR:
- *   Edite o array CERTS abaixo com seus dados reais.
+ * COMO ADICIONAR / EDITAR CERTIFICADOS:
+ *   Os dados ficam em data/certificates.json (array de objetos).
  *   Cada objeto aceita:
  *     titulo        {string}  — Nome do certificado (use \n para quebra)
  *     sigla         {string}  — Texto de fallback se logo_path estiver vazio
@@ -15,69 +15,36 @@
  *     instituicao   {string}  — Nome da instituição
  *     carga_horaria {string}  — Ex: "800 horas" (deixe "" se N/A)
  *     conclusao     {string}  — Ex: "Maio de 2024"
+ *   Este arquivo só contém a lógica: não edite nada aqui para
+ *   cadastrar um certificado.
  * ============================================================
  */
 
 (function () {
 'use strict';
 
-const CERTS = [
-  {
-    titulo: "Capacitação em Sistemas Embarcados e Inteligência Artificial na Borda",
-    sigla: "PNAAT",
-    logo_path: "",
-    thumb_path: "assets/imagens/certs/thumbs/pnaat-embarcados-ia.webp",
-    full_cert_path: "assets/imagens/certs/Capacitação_em_Sistemas_Embarcados_e_Inteligência_Artificial_na_Borda_74H.webp",
-    pdf_path: "assets/pdfs/Capacitação_em_Sistemas_Embarcados_e_Inteligência_Artificial_na_Borda_74H.pdf",
-    instituicao: "FIT - Instituto de Tecnologia",
-    carga_horaria: "74 Horas",
-    conclusao: "2026"
-  },
-  {
-    titulo: "Trilha de Fundamentos em IoT e Edge AI",
-    sigla: "PNAAT",
-    logo_path: "",
-    thumb_path: "assets/imagens/certs/thumbs/pnaat-iot-edge-ai.webp",
-    full_cert_path: "assets/imagens/certs/Trilha_de_Fundamentos_em_IoT_e _Edge_AI_28H.webp",
-    pdf_path: "assets/pdfs/Trilha_de_Fundamentos_em_IoT_e _Edge_AI_28H.pdf",
-    instituicao: "FIT - Instituto de Tecnologia",
-    carga_horaria: "28 Horas",
-    conclusao: "2026"
-  },
-  {
-    titulo: "TXM Challenge Multicenter Negócios e Eventos",
-    sigla: "TXM",
-    logo_path: "",
-    thumb_path: "assets/imagens/certs/thumbs/txm-challenge.webp",
-    full_cert_path: "assets/imagens/certs/TXM_Challenge_Multicenter_Negócios_e_Eventos_90H.webp",
-    pdf_path: "assets/pdfs/TXM_Challenge_Multicenter_Negócios_e_Eventos_90H.pdf",
-    instituicao: "TXM Methods",
-    carga_horaria: "90 Horas",
-    conclusao: "2026"
-  },
-  {
-    titulo: "1º Jornada de Inovação da Agricultura Familiar no Maranhão",
-    sigla: "1° JSAF",
-    logo_path: "",
-    thumb_path: "assets/imagens/certs/thumbs/jornada-saf.webp",
-    full_cert_path: "assets/imagens/certs/Jornada_de_Inovação_da_Agricultura_Familiar_SAF_Maranhão_e_Agência_Marandu_30H.webp",
-    pdf_path: "assets/pdfs/Jornada_de_Inovação_da_Agricultura_Familiar_SAF_Maranhão_e_Agência_Marandu_30H.pdf",
-    instituicao: "Agência Marandu",
-    carga_horaria: "30 Horas",
-    conclusao: "2026"
-  },
-  {
-    titulo: "Programação \n Back-End",
-    sigla: "SECTI",
-    logo_path: "",
-    thumb_path: "assets/imagens/certs/thumbs/back-end-400h.webp",
-    full_cert_path: "assets/imagens/certs/Programação_Back_End_400H.webp",
-    pdf_path: "assets/pdfs/Programação_Back_End_400H.pdf",
-    instituicao: "Secretaria de Ciência, Tecnologia e Inovação",
-    carga_horaria: "400 Horas",
-    conclusao: "2025"
-  }
-];
+// Catálogo carregado de data/certificates.json. O caminho é relativo ao
+// <base href="/"> do index.html, então funciona em qualquer rota
+// (/, /projetos/<id>...). A requisição começa já na execução do script
+// (em paralelo ao parse do HTML); os cards só são montados depois que
+// ela termina (ver o DOMContentLoaded abaixo).
+const DATA_URL = 'data/certificates.json';
+let CERTS = [];
+
+const certsReady = fetch(DATA_URL)
+  .then((res) => {
+    if (!res.ok) throw new Error(`HTTP ${res.status} ao carregar ${DATA_URL}`);
+    return res.json();
+  })
+  .then((data) => {
+    if (!Array.isArray(data)) throw new Error(`${DATA_URL}: o conteúdo deve ser um array de certificados`);
+    data.forEach((cert, i) => {
+      if (!cert || typeof cert.titulo !== 'string') {
+        throw new Error(`${DATA_URL}: item ${i} sem o campo "titulo" (string)`);
+      }
+    });
+    CERTS = data;
+  });
 
 let selectedIndex = null;
 let viewerEl = null;
@@ -104,8 +71,35 @@ const mqStacked = window.matchMedia('(max-width: 900px)');
 // Garante que o script só execute depois de todo o HTML renderizado
 // (também está marcado com "defer" no <script> do portfolio.html —
 // os dois juntos blindam contra a ordem de carregamento).
-document.addEventListener('DOMContentLoaded', () => {
+function showCertsError() {
+  const row = $('certs-row');
+  const meta = $('certs-meta');
+  const hint = $('certs-hint');
+  if (meta) meta.textContent = '';
+  if (hint) hint.classList.add('is-done');
+  if (row) {
+    row.innerHTML = '';
+    const msg = document.createElement('p');
+    msg.className = 'certs__error';
+    msg.setAttribute('role', 'alert');
+    msg.textContent = 'Não foi possível carregar os certificados. Tente recarregar a página.';
+    row.appendChild(msg);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await certsReady;
+  } catch (err) {
+    console.error('[certificados] Falha ao carregar ou validar os dados:', err);
+    showCertsError();
+    return;
+  }
+
   buildCertCards();
+  // Os cards agora nascem depois do DOMContentLoaded (dados via fetch): o
+  // scroll-reveal.js já varreu a página, então pedimos para observá-los.
+  if (window.PortfolioReveal) window.PortfolioReveal.observe($('certs-row'));
 
   // Cabeçalho: contagem e total de horas vêm do próprio array CERTS
   const meta = $('certs-meta');
